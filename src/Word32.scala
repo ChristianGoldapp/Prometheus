@@ -28,10 +28,13 @@ class Word32(rawValue: Int) extends Util{
   def xor(that: Word32) : Word32 = new Word32(this.value ^ that.value)
   def not : Word32 = new Word32(~this.value)
 
-  def ftoi(that: Word32) : Word32 = new Word32(this.floatValue.toInt)
-  def itof(that: Word32) : Word32 = new Word32(bitsFromFloat(floatValue))
-  def itou(that: Word32) : Word32 = new Word32(Math.abs(value))
-  def utoi(that: Word32) : Word32 = new Word32(if(value < 0) value + Int.MaxValue else value)
+  def lshift : Word32 = new Word32(this.value << 1)
+  def rshift : Word32 = new Word32(this.value >> 1)
+
+  def ftoi() : Word32 = new Word32(this.floatValue.toInt)
+  def itof() : Word32 = new Word32(bitsFromFloat(floatValue))
+  def itou() : Word32 = new Word32(Math.abs(value))
+  def utoi() : Word32 = new Word32(if(value < 0) value + Int.MaxValue else value)
 
   type FloatBinOp = Float => Float => Float
   private def fop(that: Word32, op: FloatBinOp): Word32 = new Word32(bitsFromFloat(op(this.floatValue)(that.floatValue)))
