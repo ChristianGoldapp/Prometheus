@@ -5,9 +5,24 @@ import scala.collection.mutable
   * @version 1.0
   */
 class Processor {
+  type ValueConsumer = Word32 => ()
+  type ValueBiConsumer = (Word32, Word32) => ()
+  type RegisterConsumer = Register => ()
+  type RegisterBiConsumer = (Register, Register) => ()
+  type ValueRegisterConsumer = (Value, Register) => ()
+  type UnaryFunction = Word32 => Word32
+  type BinaryFunction = (Word32, Word32) => Word32
+  type StringRegisterConsumer = (String, Register) => ()
+  type StringConsumer = String => ()
+  type Predicate = Word32 => Boolean
+  type BiPredicate = (Word32, Word32) => Boolean
+  type Action = () => ()
   val stack = new mutable.Stack[Word32]()
   val registers = Array(new Register("A"), new Register("B"), new Register("C"), new Register("D"), new Register("E"), new Register("F"), new Register("G"), new Register("H"))
   val memory = new Array[Word32](2 >> 16)
+  var program: Array[Instruction] = null
+  var programPointer: Int = 0
+  var labels: mutable.Map[String, Int] = new mutable.HashMap[String, Int]
 
   def load(ptr: Int) = memory(ptr)
 
@@ -24,7 +39,7 @@ class Processor {
   def retrieve(reg: Int) = registers(reg).get()
 
   def goto(lbl: String): Unit = {
-
+    programPointer = labels(lbl)
   }
 
   def halt(): Unit = {
@@ -36,190 +51,13 @@ class Processor {
   }
 
   abstract class Instruction {
-
     abstract def invoke()
-
-    abstract class UnaryOperation(arg1: Value, dest: Register) extends Instruction {
-
-      class MOV extends Instruction {
-        override def invoke() = dest.set(arg1.getValue)
-      }
-
-      class NOT extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.not)
-      }
-
-      class LSHIFT extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.lshift)
-      }
-
-      class RSHIFT extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.rshift)
-      }
-
-      class FTOI extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.ftoi())
-      }
-
-      class ITOF extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.itof())
-      }
-
-      class UTOI extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.utoi())
-      }
-
-      class ITOU extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.not)
-      }
-
-    }
-
-    abstract class BinaryOperation(arg1: Value, arg2: Value, dest: Register) extends Instruction {
-
-      class ADD extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.add(arg2.getValue))
-      }
-
-      class SUB extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.sub(arg2.getValue))
-      }
-
-      class MUL extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.mul(arg2.getValue))
-      }
-
-      class DIV extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.div(arg2.getValue))
-      }
-
-      class F_ADD extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.fadd(arg2.getValue))
-      }
-
-      class F_SUB extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.fsub(arg2.getValue))
-      }
-
-      class F_MUL extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.fmul(arg2.getValue))
-      }
-
-      class F_DIV extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.fdiv(arg2.getValue))
-      }
-
-      class U_ADD extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.uadd(arg2.getValue))
-      }
-
-      class U_SUB extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.usub(arg2.getValue))
-      }
-
-      class U_MUL extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.umul(arg2.getValue))
-      }
-
-      class U_DIV extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.udiv(arg2.getValue))
-      }
-
-      class AND extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.and(arg2.getValue))
-      }
-
-      class OR extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.or(arg2.getValue))
-      }
-
-      class XOR extends Instruction {
-        override def invoke() = dest.set(arg1.getValue.xor(arg2.getValue))
-      }
-
-    }
-
-    class SWP(arg1: Register, arg2: Register) extends Instruction {
-      override def invoke() = {
-        val word1 = arg1.content
-        val word2 = arg2.content
-        arg1.set(word2)
-        arg2.set(word1)
-      }
-    }
-
-    class LOAD(ptr: Value, reg: Register) extends Instruction {
-      override def invoke() = reg.set(load(ptr.getValue.intValue))
-    }
-
-    class SAVE(arg1: Value, reg: Register) extends Instruction {
-      override def invoke() = save(arg1.getValue.intValue, reg.content)
-    }
-
-    class PUSH(arg1: Value) extends Instruction {
-      override def invoke() = {
-        push(arg1.getValue)
-      }
-    }
-
-    class POP(reg: Register) extends Instruction {
-      override def invoke() = reg.set(pop())
-    }
-
-    class PEEK(reg: Register) extends Instruction {
-      override def invoke() = reg.set(peek())
-    }
-
-    class JMP(lbl: String) extends Instruction {
-      override def invoke() = goto(lbl)
-    }
-
-    abstract class UnaryJump(arg1: Value, lbl: String) extends Instruction {
-
-      class JIZ extends Instruction {
-        override def invoke() = if (arg1.getValue.intValue == 0) goto(lbl)
-      }
-
-      class JNZ extends Instruction {
-        override def invoke() = if (arg1.getValue.intValue != 0) goto(lbl)
-      }
-
-      class JGZ extends Instruction {
-        override def invoke() = if (arg1.getValue.intValue > 0) goto(lbl)
-      }
-
-      class JLZ extends Instruction {
-        override def invoke() = if (arg1.getValue.intValue < 0) goto(lbl)
-      }
-
-    }
-
-    class JEZ(arg1: Value, arg2: Value, lbl: String) extends Instruction {
-      override def invoke(): Unit = if (arg1.getValue.intValue == arg1.getValue.intValue) goto(lbl)
-    }
-
-    object NOOP extends Instruction {
-      override def invoke() = {}
-    }
-
-    object WAIT extends Instruction {
-      override def invoke(): Unit = {}
-    }
-
-    object HALT extends Instruction {
-      override def invoke(): Unit = halt()
-    }
-
-    class Syscall(arg1: Value, arg2: Value) {
-
-    }
-
   }
 
   abstract class Value(processor: Processor) {
     def getValue: Word32
 
-    case class Register(processor: Processor, reg: Int) extends Value(processor) {
+    case class RegisterValue(processor: Processor, reg: Int) extends Value(processor) {
       override def getValue = processor.retrieve(reg)
     }
 
@@ -228,5 +66,54 @@ class Processor {
     }
 
   }
+
+  class ValueConsumerOperation(arg1: Value, func: ValueConsumer) extends Instruction {
+    override def invoke() = func(arg1.getValue)
+  }
+
+  class ValueBiConsumerOperation(arg1: Value, arg2: Value, func: ValueBiConsumer) extends Instruction {
+    override def invoke() = func(arg1.getValue, arg2.getValue)
+  }
+
+  class RegisterConsumerOperation(reg1: Register, func: RegisterConsumer) extends Instruction {
+    override def invoke() = func(reg1)
+  }
+
+  class RegisterBiConsumerOperation(reg1: Register, reg2: Register, func: RegisterBiConsumer) extends Instruction {
+    override def invoke() = func(reg1, reg2)
+  }
+
+  class PredicateJump(arg1: Value, lbl: String, func: Predicate) extends Instruction {
+    override def invoke() = if (func(arg1.getValue)) goto(lbl)
+  }
+
+  class BiPredicateJump(arg1: Value, arg2: Value, lbl: String, func: BiPredicate) extends Instruction {
+    override def invoke() = if (func(arg1.getValue, arg2.getValue)) goto(lbl)
+  }
+
+  class ValueRegisterConsumerOperation(arg1: Value, arg2: Register, func: ValueRegisterConsumer) extends Instruction {
+    override def invoke() = (arg1, arg2)
+  }
+
+  class UnaryOperation(arg1: Value, dest: Register, func: UnaryFunction) extends Instruction {
+    override def invoke() = dest.set(func(arg1.getValue))
+  }
+
+  class BinaryOperation(arg1: Value, arg2: Value, dest: Register, func: BinaryFunction) extends Instruction {
+    override def invoke() = dest.set(func(arg1.getValue, arg2.getValue))
+  }
+
+  class StringRegisterConsumerOperation(str: String, reg: Register, func: StringRegisterConsumer) extends Instruction {
+    override def invoke() = func(str, reg)
+  }
+
+  class StringConsumerOperation(str: String, func: StringConsumer) extends Instruction {
+    override def invoke() = func(str)
+  }
+
+  class ActionOperation(func: Action) extends Instruction {
+    override def invoke() = func()
+  }
+
 
 }
