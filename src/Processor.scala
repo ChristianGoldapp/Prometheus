@@ -231,7 +231,7 @@ object Main {
     val p: Processor = new Processor
     exec(p, "MOV 0x40 R0")
     exec(p, "PUT 50 R1")
-    exec(p, "SUB R0, R1, R2")
+    exec(p, "MUL R0, R1, R2")
     println(p.toString)
   }
 
