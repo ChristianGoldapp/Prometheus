@@ -6,7 +6,7 @@ import scala.collection.mutable
   * @author Christian Goldapp
   * @version 1.0
   */
-class Processor {
+class Processor extends Util{
   type ValueConsumer = Word32 => Any
   type ValueBiConsumer = (Word32, Word32) => Any
   type RegisterConsumer = Register => Any
@@ -57,7 +57,7 @@ class Processor {
     if (hasLabel) {
       val scan: Scanner = new Scanner(str)
       scan.next()
-      return parseLine(scan.nextLine())
+      return parseLine(scan.nextLine().trim)
     }
     val tokens: Array[String] = str.split(" ")
     val opcode = tokens(0)
@@ -126,10 +126,14 @@ class Processor {
   }
 
   override def toString: String = {
-    var i: Int = 1
-    val sb: StringBuilder = new StringBuilder
+    val sb: StringBuilder = new StringBuilder("Registers:\n")
     for (elem <- registers) {
       sb.append("%s %s%n".format(elem.name, elem.content.toString))
+    }
+    sb.append("Stack:\n")
+    var i: Int = 0
+    for (elem <- stack) {
+      sb.append("%s %s%n".format(hex(i, 4), hex(elem.value)))
       i = i + 1
     }
     return sb.toString()
@@ -235,7 +239,10 @@ object Main {
     val p: Processor = new Processor
     exec(p, "MOV 0x40 R0")
     exec(p, "PUT 50 R1")
-    exec(p, "SUB R0, R1, R2")
+    exec(p, "PUSH 0x10")
+    exec(p, "PUSH R0")
+    println(p.toString)
+    exec(p, "_LBL PUSH R0")
     println(p.toString)
   }
 
