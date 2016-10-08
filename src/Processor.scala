@@ -125,6 +125,16 @@ class Processor {
     }
   }
 
+  override def toString: String = {
+    var i: Int = 1
+    val sb: StringBuilder = new StringBuilder
+    for (elem <- registers) {
+      sb.append("%s %s%n".format(elem.name, elem.content.toString))
+      i = i + 1
+    }
+    return sb.toString()
+  }
+
   def getRegister(name: String): Register = {
     registers(Integer.valueOf(name.substring(1, 2)))
   }
@@ -214,5 +224,18 @@ class Processor {
     override def invoke() = func()
   }
 
+}
 
+object Main {
+  def main(args: Array[String]): Unit = {
+    val p: Processor = new Processor
+    exec(p, "MOV 0x40 R0")
+    exec(p, "PUT 50 R1")
+    exec(p, "SUB R0, R1, R2")
+    println(p.toString)
+  }
+
+  def exec(p: Processor, line: String) = {
+    p.parseLine(line).invoke()
+  }
 }
