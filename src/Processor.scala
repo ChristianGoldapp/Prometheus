@@ -7,18 +7,18 @@ import scala.collection.mutable
   * @version 1.0
   */
 class Processor {
-  type ValueConsumer = Word32 => ()
-  type ValueBiConsumer = (Word32, Word32) => ()
-  type RegisterConsumer = Register => ()
-  type RegisterBiConsumer = (Register, Register) => ()
-  type ValueRegisterConsumer = (Value, Register) => ()
+  type ValueConsumer = Word32 => Any
+  type ValueBiConsumer = (Word32, Word32) => Any
+  type RegisterConsumer = Register => Any
+  type RegisterBiConsumer = (Register, Register) => Any
+  type ValueRegisterConsumer = (Value, Register) => Any
   type UnaryFunction = Word32 => Word32
   type BinaryFunction = (Word32, Word32) => Word32
-  type StringRegisterConsumer = (String, Register) => ()
-  type StringConsumer = String => ()
+  type StringRegisterConsumer = (String, Register) => Any
+  type StringConsumer = String => Any
   type Predicate = Word32 => Boolean
   type BiPredicate = (Word32, Word32) => Boolean
-  type Action = () => ()
+  type Action = Any => Any
   val stack = new mutable.Stack[Word32]()
   val registers = buildRegisters()
   val memory = new Array[Word32](2 >> 16)
@@ -87,9 +87,9 @@ class Processor {
       case ("ITOU") => new UnaryOperation(parseValue(tokens(1)), getRegister(tokens(2)), (x: Word32) => x.itou(), str)
       case ("UTOI") => new UnaryOperation(parseValue(tokens(1)), getRegister(tokens(2)), (x: Word32) => x.utoi(), str)
 
-      case ("PUT") => new StringRegisterConsumerOperation(tokens(1), getRegister(tokens(2)), (str: String, reg: Register) => reg.set(new Word32(Integer.valueOf(tokens(3)))), str)
-      case ("U_PUT") => new StringRegisterConsumerOperation(tokens(1), getRegister(tokens(2)), (str: String, reg: Register) => reg.set(new Word32(Integer.parseUnsignedInt(tokens(3)))), str)
-      case ("F_PUT") => new StringRegisterConsumerOperation(tokens(1), getRegister(tokens(2)), (str: String, reg: Register) => reg.set(new Word32(java.lang.Float.floatToIntBits(java.lang.Float.valueOf(tokens(3))))), str)
+      case ("PUT") => new StringRegisterConsumerOperation(tokens(1), getRegister(tokens(2)), (str: String, reg: Register) => reg.set(new Word32(Integer.valueOf(str))), str)
+      case ("U_PUT") => new StringRegisterConsumerOperation(tokens(1), getRegister(tokens(2)), (str: String, reg: Register) => reg.set(new Word32(Integer.parseUnsignedInt(str))), str)
+      case ("F_PUT") => new StringRegisterConsumerOperation(tokens(1), getRegister(tokens(2)), (str: String, reg: Register) => reg.set(new Word32(java.lang.Float.floatToIntBits(java.lang.Float.valueOf(str)))), str)
 
       case ("ADD") => new BinaryOperation(parseValue(tokens(1)), parseValue(tokens(2)), getRegister(tokens(3)), (x: Word32, y: Word32) => x add y, str)
       case ("SUB") => new BinaryOperation(parseValue(tokens(1)), parseValue(tokens(2)), getRegister(tokens(3)), (x: Word32, y: Word32) => x sub y, str)
@@ -118,9 +118,9 @@ class Processor {
 
       case ("JEZ") => new BiPredicateJump(parseValue(tokens(1)), parseValue(tokens(2)), tokens(3), (x: Word32, y: Word32) => x.intValue == y.intValue, str)
 
-      case ("NOOP") => new ActionOperation(() => (), str)
-      case ("WAIT") => new ActionOperation(() => (), str)
-      case ("HALT") => new ActionOperation(() => halt(), str)
+      case ("NOOP") => new ActionOperation(Any => Any, str)
+      case ("WAIT") => new ActionOperation(Any => Any, str)
+      case ("HALT") => new ActionOperation(Any => halt(), str)
 
     }
   }
@@ -144,6 +144,10 @@ class Processor {
       val number: Int = Integer.valueOf(str.substring(1, 2))
       new RegisterValue(registers(number))
     }
+    else if (str.startsWith("0x")) {
+      val value: Int = Integer.valueOf(str.substring(2), 16)
+      new Word(new Word32(value))
+    }
     else {
       val value: Int = Integer.valueOf(str, 16)
       new Word(new Word32(value))
@@ -159,7 +163,7 @@ class Processor {
   }
 
   abstract class Instruction(line: String) {
-    abstract def invoke()
+    def invoke()
 
     override def toString = line
   }
@@ -231,7 +235,7 @@ object Main {
     val p: Processor = new Processor
     exec(p, "MOV 0x40 R0")
     exec(p, "PUT 50 R1")
-    exec(p, "MUL R0, R1, R2")
+    exec(p, "SUB R0, R1, R2")
     println(p.toString)
   }
 
