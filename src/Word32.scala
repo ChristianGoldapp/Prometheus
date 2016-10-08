@@ -38,5 +38,5 @@ class Word32(rawValue: Int) extends Util{
 
   type FloatBinOp = Float => Float => Float
   private def fop(that: Word32, op: FloatBinOp): Word32 = new Word32(bitsFromFloat(op(this.floatValue)(that.floatValue)))
-  override def toString = hex(value)
+  override def toString = "%s %10d %10f %11d".format(hex(value), intValue, floatValue, uintValue)
 }
