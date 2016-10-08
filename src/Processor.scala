@@ -6,7 +6,7 @@ import scala.collection.mutable
   * @author Christian Goldapp
   * @version 1.0
   */
-class Processor extends Util{
+class Processor extends Util {
   type ValueConsumer = Word32 => Any
   type ValueBiConsumer = (Word32, Word32) => Any
   type RegisterConsumer = Register => Any
@@ -21,7 +21,7 @@ class Processor extends Util{
   type Action = Any => Any
   val stack = new mutable.Stack[Word32]()
   val registers = buildRegisters()
-  val memory = new Array[Word32](2 >> 16)
+  val memory = buildMemory(2 << 8)
   var program: Array[Instruction] = null
   var programPointer: Int = 0
   var labels: mutable.Map[String, Int] = new mutable.HashMap[String, Int]
@@ -127,14 +127,37 @@ class Processor extends Util{
 
   override def toString: String = {
     val sb: StringBuilder = new StringBuilder("Registers:\n")
+    //Simply print out all registers in order
     for (elem <- registers) {
       sb.append("%s %s%n".format(elem.name, elem.content.toString))
     }
+    //Print out the stack, with a running index
     sb.append("Stack:\n")
     var i: Int = 0
     for (elem <- stack) {
-      sb.append("%s %s%n".format(hex(i, 4), hex(elem.value)))
+      sb.append("%s %s\n".format(hex(i, 4), hex(elem.value)))
       i = i + 1
+    }
+    i = 0
+    //Print memory
+    sb.append("Memory:\n            ")
+    for (x <- 0 to 15) {
+      sb.append("%11s".format(hex(x, 1)))
+    }
+    sb.append("\n")
+    for (elem <- memory.grouped(16)) {
+      //Prepare printed strings
+      val s = elem.map(x => hex(x.value))
+      //Print start of line
+      sb.append(hex(i))
+      sb.append("   ")
+      //Print individual words
+      for (x <- 0 to 15) {
+        sb.append(s(x))
+        sb.append(" ")
+      }
+      sb.append("\n")
+      i = i + 16
     }
     return sb.toString()
   }
@@ -164,6 +187,14 @@ class Processor extends Util{
       registers.update(a, new Register("R" + a))
     }
     registers
+  }
+
+  def buildMemory(length: Int): Array[Word32] = {
+    val memory: Array[Word32] = new Array[Word32](length)
+    for (a <- 0 until length) {
+      memory.update(a, new Word32(0))
+    }
+    memory
   }
 
   abstract class Instruction(line: String) {
