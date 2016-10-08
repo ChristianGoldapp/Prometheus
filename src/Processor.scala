@@ -130,7 +130,11 @@ class Processor extends Util {
     val lines: Array[String] = input.split("\n")
     var i = 0
     program = lines.map(x => {
-      if (x.substring(0, 1) eq "_") labels(x) = i - 1
+      if (x.startsWith("_")){
+        val scan = new Scanner(x.substring(1))
+        val label = scan.next()
+        labels(label) = i - 1
+      }
       i = i + 1
       parseLine(x)
     })
@@ -289,7 +293,7 @@ class Processor extends Util {
 object Main {
   def main(args: Array[String]): Unit = {
     val p: Processor = new Processor
-    p.loadProgram("MOV 0x40 R0\nPUT 50 R1\n_LAB PUSH 0x10\nPUSH R0\nSAVE 0x01 R0")
+    p.loadProgram("MOV 0xA R0\nPUSH 0x1\nPUSH 0x1\n_LOOP POP R1\nPOP R2\nADD R1 R2 R3\nPUSH R2\nPUSH R1\nPUSH R3\nSUB R0 0x1 R0\nJNZ R0 LOOP")
     p.start()
     println(p.toString)
   }
