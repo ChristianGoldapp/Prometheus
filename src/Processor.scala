@@ -25,6 +25,7 @@ class Processor extends Util {
   var program: Array[Instruction] = null
   var programPointer: Int = 0
   var labels: mutable.Map[String, Int] = new mutable.HashMap[String, Int]
+  var run = false
 
   def load(ptr: Int) = memory(ptr)
 
@@ -122,6 +123,26 @@ class Processor extends Util {
       case ("WAIT") => new ActionOperation(Any => Any, str)
       case ("HALT") => new ActionOperation(Any => halt(), str)
 
+    }
+  }
+
+  def loadProgram(input: String): Unit = {
+    val lines: Array[String] = input.split("\n")
+    var i = 0
+    program = lines.map(x => {
+      if (x.substring(0, 1) eq "_") labels(x) = i - 1
+      i = i + 1
+      parseLine(x)
+    })
+  }
+
+  def start(): Unit = {
+    programPointer = 0
+    run = true
+    while (run) {
+      program(programPointer).invoke()
+      programPointer = programPointer + 1
+      if(programPointer >= program.length) run = false
     }
   }
 
@@ -240,7 +261,7 @@ class Processor extends Util {
   }
 
   class ValueRegisterConsumerOperation(arg1: Value, arg2: Register, func: ValueRegisterConsumer, line: String) extends Instruction(line: String) {
-    override def invoke() = (arg1, arg2)
+    override def invoke() = func(arg1, arg2)
   }
 
   class UnaryOperation(arg1: Value, dest: Register, func: UnaryFunction, line: String) extends Instruction(line: String) {
@@ -268,12 +289,8 @@ class Processor extends Util {
 object Main {
   def main(args: Array[String]): Unit = {
     val p: Processor = new Processor
-    exec(p, "MOV 0x40 R0")
-    exec(p, "PUT 50 R1")
-    exec(p, "PUSH 0x10")
-    exec(p, "PUSH R0")
-    println(p.toString)
-    exec(p, "_LBL PUSH R0")
+    p.loadProgram("MOV 0x40 R0\nPUT 50 R1\n_LAB PUSH 0x10\nPUSH R0\nSAVE 0x01 R0")
+    p.start()
     println(p.toString)
   }
 
