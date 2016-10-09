@@ -18,6 +18,7 @@ class Processor extends Util {
   val stack = new mutable.Stack[Word32]()
   val registers = buildRegisters()
   val memory = buildMemory(2 << 8)
+  val MEM_PRINT_EMPTY_LINES = false
   var program: Array[Instruction] = null
   var programPointer: Int = 0
   var labels: mutable.Map[String, Int] = new mutable.HashMap[String, Int]
@@ -127,9 +128,7 @@ class Processor extends Util {
     registers.foreach(elem => sb.append("%s    %s%n".format(elem.name, elem.content.toString)))
     //Print out the stack, with a running index
     sb.append("Stack:\n")
-    for (elem <- stack.zipWithIndex) {
-      sb.append("%s %s\n".format(hex(stack.length - elem._2, 4 - 1), elem._1))
-    }
+    stack.zipWithIndex.foreach(elem => sb.append("%s %s\n".format(hex(stack.length - elem._2, 4 - 1), elem._1)))
     //Print memory
     sb.append("Memory:\n            ")
     Range(0, 16).foreach(x => sb.append("%11s".format(hex(x, 1))))
@@ -137,14 +136,16 @@ class Processor extends Util {
     memory.grouped(16).zipWithIndex.foreach(line => {
       val elem = line._1
       val linenum = line._2
-      //Prepare printed strings
-      val s = elem.map(x => hex(x.value))
-      //Print start of line
-      sb.append(hex(linenum) + "   ")
-      elem.map(x => hex(x.value)).foreach(hexstring => sb.append(hexstring + " "))
-      sb.append("\n")
+      if (MEM_PRINT_EMPTY_LINES || elem.forall(x => x.value == 0)) {
+        //Prepare printed strings
+        val s = elem.map(x => hex(x.value))
+        //Print start of line
+        sb.append(hex(linenum) + "   ")
+        elem.map(x => hex(x.value)).foreach(hexstring => sb.append(hexstring + " "))
+        sb.append("\n")
+      }
     })
-    return sb.toString()
+    sb.toString()
   }
 
   private def load(ptr: Int) = memory(ptr)
@@ -194,17 +195,13 @@ class Processor extends Util {
 
   private def buildRegisters(): Array[Register] = {
     val registers: Array[Register] = new Array[Register](10)
-    for (a <- 0 to 9) {
-      registers.update(a, new Register("R" + a))
-    }
+    Range(0, 10).foreach(a => registers.update(a, new Register("R" + a)))
     registers
   }
 
   private def buildMemory(length: Int): Array[Word32] = {
     val memory: Array[Word32] = new Array[Word32](length)
-    for (a <- 0 until length) {
-      memory.update(a, new Word32(0))
-    }
+    Range(0, length).foreach(a => memory.update(a, new Word32(0)))
     memory
   }
 
@@ -274,15 +271,6 @@ class Processor extends Util {
     override def invoke() = func()
   }
 
-}
-
-/**
-  * @author Christian Goldapp
-  * @version 1.0
-  */
-
-object Constants {
-  val MEM_PRINT_EMPTY_LINES = false
 }
 
 object Main {
