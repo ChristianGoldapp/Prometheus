@@ -55,7 +55,7 @@ class Processor extends Util {
     registers.foreach(elem => sb.append("%s    %s%n".format(elem.name, elem.content.toString)))
     //Print out the stack, with a running index
     sb.append("Stack:\n")
-    stack.zipWithIndex.foreach(elem => sb.append("%s %s\n".format(hex(stack.length - elem._2, 4 - 1), elem._1)))
+    stack.zipWithIndex.foreach(elem => sb.append("%s %s\n".format(hex(stack.length - elem._2 - 1, 4), elem._1)))
     //Print memory
     sb.append("Memory:\n            ")
     Range(0, 16).foreach(x => sb.append("%11s".format(hex(x, 1))))
@@ -63,7 +63,7 @@ class Processor extends Util {
     memory.grouped(16).zipWithIndex.foreach(line => {
       val elem = line._1
       val linenum = line._2
-      if (MEM_PRINT_EMPTY_LINES || elem.forall(x => x.value == 0)) {
+      if (MEM_PRINT_EMPTY_LINES || !elem.forall(x => x.value == 0)) {
         //Prepare printed strings
         val s = elem.map(x => hex(x.value))
         //Print start of line
