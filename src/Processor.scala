@@ -130,7 +130,7 @@ class Processor extends Util {
     val lines: Array[String] = input.split("\n")
     var i = 0
     program = lines.map(x => {
-      if (x.startsWith("_")){
+      if (x.startsWith("_")) {
         val scan = new Scanner(x.substring(1))
         val label = scan.next()
         labels(label) = i - 1
@@ -146,44 +146,34 @@ class Processor extends Util {
     while (run) {
       program(programPointer).invoke()
       programPointer = programPointer + 1
-      if(programPointer >= program.length) run = false
+      if (programPointer >= program.length) run = false
     }
   }
 
   override def toString: String = {
-    val sb: StringBuilder = new StringBuilder("Registers:\n")
+    val sb: StringBuilder = new StringBuilder("Processor:\n")
+    sb.append("Registers:\n")
     //Simply print out all registers in order
-    for (elem <- registers) {
-      sb.append("%s %s%n".format(elem.name, elem.content.toString))
-    }
+    registers.foreach(elem => sb.append("%s %s%n".format(elem.name, elem.content.toString)))
     //Print out the stack, with a running index
     sb.append("Stack:\n")
-    var i: Int = 0
-    for (elem <- stack) {
-      sb.append("%s %s\n".format(hex(i, 4), hex(elem.value)))
-      i = i + 1
+    for (elem <- stack.zipWithIndex) {
+      sb.append("%s %s\n".format(hex(elem._2, 4), hex(elem._1.value)))
     }
-    i = 0
     //Print memory
     sb.append("Memory:\n            ")
-    for (x <- 0 to 15) {
-      sb.append("%11s".format(hex(x, 1)))
-    }
+    Range(0, 16).foreach(x => sb.append("%11s".format(hex(x, 1))))
     sb.append("\n")
-    for (elem <- memory.grouped(16)) {
+    memory.grouped(16).zipWithIndex.foreach(line => {
+      val elem = line._1
+      val linenum = line._2
       //Prepare printed strings
       val s = elem.map(x => hex(x.value))
       //Print start of line
-      sb.append(hex(i))
-      sb.append("   ")
-      //Print individual words
-      for (x <- 0 to 15) {
-        sb.append(s(x))
-        sb.append(" ")
-      }
+      sb.append(hex(linenum) + "   ")
+      elem.map(x => hex(x.value)).foreach(hexstring => sb.append(hexstring + " "))
       sb.append("\n")
-      i = i + 16
-    }
+    })
     return sb.toString()
   }
 
@@ -293,7 +283,7 @@ class Processor extends Util {
 object Main {
   def main(args: Array[String]): Unit = {
     val p: Processor = new Processor
-    p.loadProgram("MOV 0xA R0\nPUSH 0x1\nPUSH 0x1\n_LOOP POP R1\nPOP R2\nADD R1 R2 R3\nPUSH R2\nPUSH R1\nPUSH R3\nSUB R0 0x1 R0\nJNZ R0 LOOP")
+    p.loadProgram("MOV 0x10 R0\nPUSH 0x1\nPUSH 0x1\n_LOOP POP R1\nPOP R2\nADD R1 R2 R3\nSUB 0x10 R0 R4\nSAVE R4 R3\nPUSH R2\nPUSH R1\nPUSH R3\nSUB R0 0x1 R0\nJNZ R0 LOOP")
     p.start()
     println(p.toString)
   }
