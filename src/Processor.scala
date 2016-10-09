@@ -3,28 +3,79 @@ import java.util.Scanner
 import scala.collection.mutable
 
 class Processor extends Util {
-  type ValueConsumer = Word32 => Any
-  type ValueBiConsumer = (Word32, Word32) => Any
-  type RegisterConsumer = Register => Any
-  type RegisterBiConsumer = (Register, Register) => Any
-  type ValueRegisterConsumer = (Value, Register) => Any
-  type UnaryFunction = Word32 => Word32
-  type BinaryFunction = (Word32, Word32) => Word32
-  type StringRegisterConsumer = (String, Register) => Any
-  type StringConsumer = String => Any
-  type Predicate = Word32 => Boolean
-  type BiPredicate = (Word32, Word32) => Boolean
-  type Action = Any => Any
-  val stack = new mutable.Stack[Word32]()
-  val registers = buildRegisters()
-  val memory = buildMemory(2 << 8)
-  val MEM_PRINT_EMPTY_LINES = false
-  var program: Array[Instruction] = null
-  var programPointer: Int = 0
-  var labels: mutable.Map[String, Int] = new mutable.HashMap[String, Int]
-  var run = false
+  private type ValueConsumer = Word32 => Any
+  private type ValueBiConsumer = (Word32, Word32) => Any
+  private type RegisterConsumer = Register => Any
+  private type RegisterBiConsumer = (Register, Register) => Any
+  private type ValueRegisterConsumer = (Value, Register) => Any
+  private type UnaryFunction = Word32 => Word32
+  private type BinaryFunction = (Word32, Word32) => Word32
+  private type StringRegisterConsumer = (String, Register) => Any
+  private type StringConsumer = String => Any
+  private type Predicate = Word32 => Boolean
+  private type BiPredicate = (Word32, Word32) => Boolean
+  private type Action = Any => Any
+  private val stack = new mutable.Stack[Word32]()
+  private val registers = buildRegisters()
+  private val memory = buildMemory(2 << 8)
+  private val MEM_PRINT_EMPTY_LINES = false
+  private var program: Array[Instruction] = null
+  private var programPointer: Int = 0
+  private var labels: mutable.Map[String, Int] = new mutable.HashMap[String, Int]
+  private var run = false
 
-  def parseLine(str: String): Instruction = {
+  def loadProgram(input: String): Unit = {
+    val lines: Array[String] = input.split("\n")
+    var i = 0
+    program = lines.map(x => {
+      if (x.startsWith("_")) {
+        val scan = new Scanner(x.substring(1))
+        val label = scan.next()
+        labels(label) = i
+      }
+      i = i + 1
+      parseLine(x)
+    })
+  }
+
+  def start(): Unit = {
+    programPointer = 0
+    run = true
+    while (run) {
+      program(programPointer).invoke()
+      programPointer = programPointer + 1
+      if (programPointer >= program.length) run = false
+    }
+  }
+
+  override def toString: String = {
+    val sb: StringBuilder = new StringBuilder("Processor:\n")
+    sb.append("Registers:\n")
+    //Simply print out all registers in order
+    registers.foreach(elem => sb.append("%s    %s%n".format(elem.name, elem.content.toString)))
+    //Print out the stack, with a running index
+    sb.append("Stack:\n")
+    stack.zipWithIndex.foreach(elem => sb.append("%s %s\n".format(hex(stack.length - elem._2, 4 - 1), elem._1)))
+    //Print memory
+    sb.append("Memory:\n            ")
+    Range(0, 16).foreach(x => sb.append("%11s".format(hex(x, 1))))
+    sb.append("\n")
+    memory.grouped(16).zipWithIndex.foreach(line => {
+      val elem = line._1
+      val linenum = line._2
+      if (MEM_PRINT_EMPTY_LINES || elem.forall(x => x.value == 0)) {
+        //Prepare printed strings
+        val s = elem.map(x => hex(x.value))
+        //Print start of line
+        sb.append(hex(linenum) + "   ")
+        elem.map(x => hex(x.value)).foreach(hexstring => sb.append(hexstring + " "))
+        sb.append("\n")
+      }
+    })
+    sb.toString()
+  }
+
+  private def parseLine(str: String): Instruction = {
     val hasLabel: Boolean = str.startsWith("_")
     if (hasLabel) {
       val scan: Scanner = new Scanner(str)
@@ -95,57 +146,6 @@ class Processor extends Util {
       case ("HALT") => new ActionOperation(Any => halt(), str)
 
     }
-  }
-
-  def loadProgram(input: String): Unit = {
-    val lines: Array[String] = input.split("\n")
-    var i = 0
-    program = lines.map(x => {
-      if (x.startsWith("_")) {
-        val scan = new Scanner(x.substring(1))
-        val label = scan.next()
-        labels(label) = i
-      }
-      i = i + 1
-      parseLine(x)
-    })
-  }
-
-  def start(): Unit = {
-    programPointer = 0
-    run = true
-    while (run) {
-      program(programPointer).invoke()
-      programPointer = programPointer + 1
-      if (programPointer >= program.length) run = false
-    }
-  }
-
-  override def toString: String = {
-    val sb: StringBuilder = new StringBuilder("Processor:\n")
-    sb.append("Registers:\n")
-    //Simply print out all registers in order
-    registers.foreach(elem => sb.append("%s    %s%n".format(elem.name, elem.content.toString)))
-    //Print out the stack, with a running index
-    sb.append("Stack:\n")
-    stack.zipWithIndex.foreach(elem => sb.append("%s %s\n".format(hex(stack.length - elem._2, 4 - 1), elem._1)))
-    //Print memory
-    sb.append("Memory:\n            ")
-    Range(0, 16).foreach(x => sb.append("%11s".format(hex(x, 1))))
-    sb.append("\n")
-    memory.grouped(16).zipWithIndex.foreach(line => {
-      val elem = line._1
-      val linenum = line._2
-      if (MEM_PRINT_EMPTY_LINES || elem.forall(x => x.value == 0)) {
-        //Prepare printed strings
-        val s = elem.map(x => hex(x.value))
-        //Print start of line
-        sb.append(hex(linenum) + "   ")
-        elem.map(x => hex(x.value)).foreach(hexstring => sb.append(hexstring + " "))
-        sb.append("\n")
-      }
-    })
-    sb.toString()
   }
 
   private def load(ptr: Int) = memory(ptr)
@@ -290,9 +290,5 @@ object Main {
     p.loadProgram("MOV 0x20 R9\nMOV R9 R0\nPUSH 0x1\nPUSH 0x1\n_LOOP POP R1\nPOP R2\nADD R1 R2 R3\nSUB R9 R0 R4\nSAVE R4 R3\nPUSH R2\nPUSH R1\nPUSH R3\nSUB R0 0x1 R0\nJNZ R0 LOOP")
     p.start()
     println(p.toString)
-  }
-
-  def exec(p: Processor, line: String) = {
-    p.parseLine(line).invoke()
   }
 }
