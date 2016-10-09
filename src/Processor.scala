@@ -2,10 +2,6 @@ import java.util.Scanner
 
 import scala.collection.mutable
 
-/**
-  * @author Christian Goldapp
-  * @version 1.0
-  */
 class Processor extends Util {
   type ValueConsumer = Word32 => Any
   type ValueBiConsumer = (Word32, Word32) => Any
@@ -26,32 +22,6 @@ class Processor extends Util {
   var programPointer: Int = 0
   var labels: mutable.Map[String, Int] = new mutable.HashMap[String, Int]
   var run = false
-
-  def load(ptr: Int) = memory(ptr)
-
-  def save(ptr: Int, word: Word32) = memory.update(ptr, word)
-
-  def push(word: Word32) = stack.push(word)
-
-  def pop() = stack.pop()
-
-  def peek() = stack.top
-
-  def store(reg: Int, word: Word32) = registers(reg).set(word)
-
-  def retrieve(reg: Int) = registers(reg).get()
-
-  def goto(lbl: String): Unit = {
-    programPointer = labels(lbl)
-  }
-
-  def halt(): Unit = {
-
-  }
-
-  def syscall(call: Word32, argument: Word32): Unit = {
-
-  }
 
   def parseLine(str: String): Instruction = {
     val hasLabel: Boolean = str.startsWith("_")
@@ -154,11 +124,11 @@ class Processor extends Util {
     val sb: StringBuilder = new StringBuilder("Processor:\n")
     sb.append("Registers:\n")
     //Simply print out all registers in order
-    registers.foreach(elem => sb.append("%s %s%n".format(elem.name, elem.content.toString)))
+    registers.foreach(elem => sb.append("%s    %s%n".format(elem.name, elem.content.toString)))
     //Print out the stack, with a running index
     sb.append("Stack:\n")
     for (elem <- stack.zipWithIndex) {
-      sb.append("%s %s\n".format(hex(elem._2, 4), hex(elem._1.value)))
+      sb.append("%s %s\n".format(hex(stack.length - elem._2, 4 - 1), elem._1))
     }
     //Print memory
     sb.append("Memory:\n            ")
@@ -177,11 +147,37 @@ class Processor extends Util {
     return sb.toString()
   }
 
-  def getRegister(name: String): Register = {
+  private def load(ptr: Int) = memory(ptr)
+
+  private def save(ptr: Int, word: Word32) = memory.update(ptr, word)
+
+  private def push(word: Word32) = stack.push(word)
+
+  private def pop() = stack.pop()
+
+  private def peek() = stack.top
+
+  private def store(reg: Int, word: Word32) = registers(reg).set(word)
+
+  private def retrieve(reg: Int) = registers(reg).get()
+
+  private def goto(lbl: String): Unit = {
+    programPointer = labels(lbl)
+  }
+
+  private def halt(): Unit = {
+    run = false
+  }
+
+  private def syscall(call: Word32, argument: Word32): Unit = {
+
+  }
+
+  private def getRegister(name: String): Register = {
     registers(Integer.valueOf(name.substring(1, 2)))
   }
 
-  def parseValue(str: String): Value = {
+  private def parseValue(str: String): Value = {
     if (str.startsWith("R")) {
       val number: Int = Integer.valueOf(str.substring(1, 2))
       new RegisterValue(registers(number))
@@ -196,7 +192,7 @@ class Processor extends Util {
     }
   }
 
-  def buildRegisters(): Array[Register] = {
+  private def buildRegisters(): Array[Register] = {
     val registers: Array[Register] = new Array[Register](10)
     for (a <- 0 to 9) {
       registers.update(a, new Register("R" + a))
@@ -204,7 +200,7 @@ class Processor extends Util {
     registers
   }
 
-  def buildMemory(length: Int): Array[Word32] = {
+  private def buildMemory(length: Int): Array[Word32] = {
     val memory: Array[Word32] = new Array[Word32](length)
     for (a <- 0 until length) {
       memory.update(a, new Word32(0))
@@ -212,78 +208,87 @@ class Processor extends Util {
     memory
   }
 
-  abstract class Instruction(line: String) {
+  private abstract class Instruction(line: String) {
     def invoke()
 
     override def toString = line
   }
 
-  abstract class Value() {
+  private abstract class Value() {
     def getValue: Word32
   }
 
-  class Word(word: Word32) extends Value() {
+  private class Word(word: Word32) extends Value() {
     override def getValue = word
   }
 
-  class RegisterValue(register: Register) extends Value() {
+  private class RegisterValue(register: Register) extends Value() {
     override def getValue = register.content
   }
 
-  class ValueConsumerOperation(arg1: Value, func: ValueConsumer, line: String) extends Instruction(line: String) {
+  private class ValueConsumerOperation(arg1: Value, func: ValueConsumer, line: String) extends Instruction(line: String) {
     override def invoke() = func(arg1.getValue)
   }
 
-  class ValueBiConsumerOperation(arg1: Value, arg2: Value, func: ValueBiConsumer, line: String) extends Instruction(line: String) {
+  private class ValueBiConsumerOperation(arg1: Value, arg2: Value, func: ValueBiConsumer, line: String) extends Instruction(line: String) {
     override def invoke() = func(arg1.getValue, arg2.getValue)
   }
 
-  class RegisterConsumerOperation(reg1: Register, func: RegisterConsumer, line: String) extends Instruction(line: String) {
+  private class RegisterConsumerOperation(reg1: Register, func: RegisterConsumer, line: String) extends Instruction(line: String) {
     override def invoke() = func(reg1)
   }
 
-  class RegisterBiConsumerOperation(reg1: Register, reg2: Register, func: RegisterBiConsumer, line: String) extends Instruction(line: String) {
+  private class RegisterBiConsumerOperation(reg1: Register, reg2: Register, func: RegisterBiConsumer, line: String) extends Instruction(line: String) {
     override def invoke() = func(reg1, reg2)
   }
 
-  class PredicateJump(arg1: Value, lbl: String, func: Predicate, line: String) extends Instruction(line: String) {
+  private class PredicateJump(arg1: Value, lbl: String, func: Predicate, line: String) extends Instruction(line: String) {
     override def invoke() = if (func(arg1.getValue)) goto(lbl)
   }
 
-  class BiPredicateJump(arg1: Value, arg2: Value, lbl: String, func: BiPredicate, line: String) extends Instruction(line: String) {
+  private class BiPredicateJump(arg1: Value, arg2: Value, lbl: String, func: BiPredicate, line: String) extends Instruction(line: String) {
     override def invoke() = if (func(arg1.getValue, arg2.getValue)) goto(lbl)
   }
 
-  class ValueRegisterConsumerOperation(arg1: Value, arg2: Register, func: ValueRegisterConsumer, line: String) extends Instruction(line: String) {
+  private class ValueRegisterConsumerOperation(arg1: Value, arg2: Register, func: ValueRegisterConsumer, line: String) extends Instruction(line: String) {
     override def invoke() = func(arg1, arg2)
   }
 
-  class UnaryOperation(arg1: Value, dest: Register, func: UnaryFunction, line: String) extends Instruction(line: String) {
+  private class UnaryOperation(arg1: Value, dest: Register, func: UnaryFunction, line: String) extends Instruction(line: String) {
     override def invoke() = dest.set(func(arg1.getValue))
   }
 
-  class BinaryOperation(arg1: Value, arg2: Value, dest: Register, func: BinaryFunction, line: String) extends Instruction(line: String) {
+  private class BinaryOperation(arg1: Value, arg2: Value, dest: Register, func: BinaryFunction, line: String) extends Instruction(line: String) {
     override def invoke() = dest.set(func(arg1.getValue, arg2.getValue))
   }
 
-  class StringRegisterConsumerOperation(str: String, reg: Register, func: StringRegisterConsumer, line: String) extends Instruction(line: String) {
+  private class StringRegisterConsumerOperation(str: String, reg: Register, func: StringRegisterConsumer, line: String) extends Instruction(line: String) {
     override def invoke() = func(str, reg)
   }
 
-  class StringConsumerOperation(str: String, func: StringConsumer, line: String) extends Instruction(line: String) {
+  private class StringConsumerOperation(str: String, func: StringConsumer, line: String) extends Instruction(line: String) {
     override def invoke() = func(str)
   }
 
-  class ActionOperation(func: Action, line: String) extends Instruction(line: String) {
+  private class ActionOperation(func: Action, line: String) extends Instruction(line: String) {
     override def invoke() = func()
   }
 
 }
 
+/**
+  * @author Christian Goldapp
+  * @version 1.0
+  */
+
+object Constants {
+  val MEM_PRINT_EMPTY_LINES = false
+}
+
 object Main {
   def main(args: Array[String]): Unit = {
     val p: Processor = new Processor
-    p.loadProgram("MOV 0x10 R0\nPUSH 0x1\nPUSH 0x1\n_LOOP POP R1\nPOP R2\nADD R1 R2 R3\nSUB 0x10 R0 R4\nSAVE R4 R3\nPUSH R2\nPUSH R1\nPUSH R3\nSUB R0 0x1 R0\nJNZ R0 LOOP")
+    p.loadProgram("MOV 0x20 R9\nMOV R9 R0\nPUSH 0x1\nPUSH 0x1\n_LOOP POP R1\nPOP R2\nADD R1 R2 R3\nSUB R9 R0 R4\nSAVE R4 R3\nPUSH R2\nPUSH R1\nPUSH R3\nSUB R0 0x1 R0\nJNZ R0 LOOP")
     p.start()
     println(p.toString)
   }
