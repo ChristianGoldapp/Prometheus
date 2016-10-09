@@ -205,14 +205,25 @@ class Processor extends Util {
     memory
   }
 
+  private abstract class Value() {
+    def getValue: Word32
+  }
+
   private abstract class Instruction(line: String) {
     def invoke()
 
     override def toString = line
   }
 
-  private abstract class Value() {
-    def getValue: Word32
+  class Register(n: String) extends Util {
+    val name = n
+    var content: Word32 = new Word32(0)
+
+    override def toString = String.format("%s:%s", n, content.toString)
+
+    def set(word: Word32) = content = word
+
+    def get() = content
   }
 
   private class Word(word: Word32) extends Value() {
