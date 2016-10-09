@@ -104,7 +104,7 @@ class Processor extends Util {
       if (x.startsWith("_")) {
         val scan = new Scanner(x.substring(1))
         val label = scan.next()
-        labels(label) = i - 1
+        labels(label) = i
       }
       i = i + 1
       parseLine(x)
@@ -163,7 +163,7 @@ class Processor extends Util {
   private def retrieve(reg: Int) = registers(reg).get()
 
   private def goto(lbl: String): Unit = {
-    programPointer = labels(lbl)
+    programPointer = labels(lbl) - 1
   }
 
   private def halt(): Unit = {
