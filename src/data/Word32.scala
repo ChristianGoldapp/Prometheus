@@ -1,5 +1,11 @@
+package data
+
+import java.nio.ByteBuffer
+
+import common.Util
+
 /**
-  * @author Christian Goldapp
+  * @author Chris Gold
   * @version 1.0
   */
 class Word32(rawValue: Int) extends Util{
@@ -24,13 +30,13 @@ class Word32(rawValue: Int) extends Util{
 
   def fadd(that: Word32) : Word32 = fop(that, a => b => a+b)
 
+  private def fop(that: Word32, op: FloatBinOp): Word32 = new Word32(bitsFromFloat(op(this.floatValue)(that.floatValue)))
+
   def fsub(that: Word32) : Word32 = fop(that, a => b => a-b)
 
   def fmul(that: Word32) : Word32 = fop(that, a => b => a*b)
 
   def fdiv(that: Word32) : Word32 = fop(that, a => b => a/b)
-
-  private def fop(that: Word32, op: FloatBinOp): Word32 = new Word32(bitsFromFloat(op(this.floatValue)(that.floatValue)))
 
   def and(that: Word32) : Word32 = new Word32(this.value & that.value)
 
@@ -48,9 +54,13 @@ class Word32(rawValue: Int) extends Util{
 
   def itof() : Word32 = new Word32(bitsFromFloat(floatValue))
 
+  def floatValue = floatFromBits(value)
+
   def itou() : Word32 = new Word32(Math.abs(value))
 
   def utoi() : Word32 = new Word32(if(value < 0) value + Int.MaxValue else value)
+
+  def bytes(): Array[Byte] = bytesFromInt(value)
 
   override def toString = "%s %10d %20f %11d %s".format(hex(value), intValue, floatValue, uintValue, String.format("%32s", Integer.toUnsignedString(value, 2)).replace(" ", "0")
   )
@@ -58,6 +68,15 @@ class Word32(rawValue: Int) extends Util{
   def intValue = value
 
   def uintValue = Integer.toUnsignedLong(value)
+}
 
-  def floatValue = floatFromBits(value)
+object Word32 extends Util {
+  def fromBytes(bytes: Array[Byte]) = new Word32(ByteBuffer.wrap(bytes).getInt)
+
+  def valueOf(s: String): Word32 = {
+    if (s.startsWith("0x")) new Word32(Integer.parseUnsignedInt(s.substring(2)))
+    else new Word32(Integer.valueOf(s))
+  }
+
+  def fromFloat(f: Float) = new Word32(bitsFromFloat(f))
 }

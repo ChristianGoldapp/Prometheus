@@ -1,5 +1,8 @@
 import java.util.Scanner
 
+import common.Util
+import data.Word32
+
 import scala.collection.mutable
 
 class Processor extends Util {
