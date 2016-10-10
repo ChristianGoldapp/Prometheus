@@ -139,7 +139,7 @@ class Processor extends Util {
       case ("JLZ") => new PredicateJump(parseValue(tokens(1)), tokens(2), (x: Word32) => x.intValue < 0, str)
       case ("JSZ") => new PredicateJump(parseValue(tokens(1)), tokens(2), (x: Word32) => x.intValue > 0, str)
 
-      case ("JEZ") => new BiPredicateJump(parseValue(tokens(1)), parseValue(tokens(2)), tokens(3), (x: Word32, y: Word32) => x.intValue == y.intValue, str)
+      case ("JEQ") => new BiPredicateJump(parseValue(tokens(1)), parseValue(tokens(2)), tokens(3), (x: Word32, y: Word32) => x.intValue == y.intValue, str)
 
       case ("NOOP") => new ActionOperation(Any => Any, str)
       case ("WAIT") => new ActionOperation(Any => Any, str)
