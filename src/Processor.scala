@@ -290,7 +290,7 @@ class Processor extends Util {
 object Main {
   def main(args: Array[String]): Unit = {
     val p: Processor = new Processor
-    p.loadProgram("MOV 0x20 R9\nMOV R9 R0\nPUSH 0x1\nPUSH 0x1\n_LOOP POP R1\nPOP R2\nADD R1 R2 R3\nSUB R9 R0 R4\nSAVE R4 R3\nPUSH R2\nPUSH R1\nPUSH R3\nSUB R0 0x1 R0\nJNZ R0 LOOP")
+    p.loadProgram("MOV 0x30 R9\nMOV R9 R0\nPUSH 0x1\nPUSH 0x1\n_LOOP POP R1\nPOP R2\nADD R1 R2 R3\nSUB R9 R0 R4\nSAVE R4 R3\nPUSH R2\nPUSH R1\nPUSH R3\nSUB R0 0x1 R0\nJNZ R0 LOOP")
     p.start()
     println(p.toString)
   }
