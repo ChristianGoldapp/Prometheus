@@ -8,69 +8,72 @@ import common.Util
   * @author Chris Gold
   * @version 1.0
   */
-class Word32(rawValue: Int) extends Util{
+class Word32(rawValue: Int) extends Util {
   type FloatBinOp = Float => Float => Float
   val value = rawValue
 
-  def div(that: Word32) : Word32 = new Word32(this.value / that.value)
+  def div(that: Word32): Word32 = new Word32(this.value / that.value)
 
-  def uadd(that: Word32) : Word32 = add(that)
+  def uadd(that: Word32): Word32 = add(that)
 
   def add(that: Word32): Word32 = new Word32(this.value + that.value)
 
-  def usub(that: Word32) : Word32 = sub(that)
+  def usub(that: Word32): Word32 = sub(that)
 
   def sub(that: Word32): Word32 = new Word32(this.value - that.value)
 
-  def umul(that: Word32) : Word32 = mul(that)
+  def umul(that: Word32): Word32 = mul(that)
 
   def mul(that: Word32): Word32 = new Word32(this.value * that.value)
 
-  def udiv(that: Word32) : Word32 = new Word32(Integer.divideUnsigned(this.value, that.value))
+  def udiv(that: Word32): Word32 = new Word32(Integer.divideUnsigned(this.value, that.value))
 
-  def fadd(that: Word32) : Word32 = fop(that, a => b => a+b)
+  def fadd(that: Word32): Word32 = fop(that, a => b => a + b)
 
   private def fop(that: Word32, op: FloatBinOp): Word32 = new Word32(bitsFromFloat(op(this.floatValue)(that.floatValue)))
 
-  def fsub(that: Word32) : Word32 = fop(that, a => b => a-b)
-
-  def fmul(that: Word32) : Word32 = fop(that, a => b => a*b)
-
-  def fdiv(that: Word32) : Word32 = fop(that, a => b => a/b)
-
-  def and(that: Word32) : Word32 = new Word32(this.value & that.value)
-
-  def or(that: Word32) : Word32 = new Word32(this.value | that.value)
-
-  def xor(that: Word32) : Word32 = new Word32(this.value ^ that.value)
-
-  def not : Word32 = new Word32(~this.value)
-
-  def lshift : Word32 = new Word32(this.value << 1)
-
-  def rshift : Word32 = new Word32(this.value >> 1)
-
-  def ftoi() : Word32 = new Word32(this.floatValue.toInt)
-
-  def itof() : Word32 = new Word32(bitsFromFloat(floatValue))
-
   def floatValue = floatFromBits(value)
 
-  def itou() : Word32 = new Word32(Math.abs(value))
+  def fsub(that: Word32): Word32 = fop(that, a => b => a - b)
 
-  def utoi() : Word32 = new Word32(if(value < 0) value + Int.MaxValue else value)
+  def fmul(that: Word32): Word32 = fop(that, a => b => a * b)
+
+  def fdiv(that: Word32): Word32 = fop(that, a => b => a / b)
+
+  def and(that: Word32): Word32 = new Word32(this.value & that.value)
+
+  def or(that: Word32): Word32 = new Word32(this.value | that.value)
+
+  def xor(that: Word32): Word32 = new Word32(this.value ^ that.value)
+
+  def not: Word32 = new Word32(~this.value)
+
+  def lshift: Word32 = new Word32(this.value << 1)
+
+  def rshift: Word32 = new Word32(this.value >> 1)
+
+  def ftoi(): Word32 = new Word32(this.floatValue.toInt)
+
+  def itof(): Word32 = new Word32(bitsFromFloat(floatValue))
+
+  def itou(): Word32 = new Word32(Math.abs(value))
+
+  def utoi(): Word32 = new Word32(if (value < 0) value + Int.MaxValue else value)
 
   def bytes(): Array[Byte] = bytesFromInt(value)
 
-  override def toString = "%s %10d %20f %11d %s".format(hex(value), intValue, floatValue, uintValue, String.format("%32s", Integer.toUnsignedString(value, 2)).replace(" ", "0")
-  )
+  override def toString = "%s %10d %20f %11d %s".format(hex(value), intValue, floatValue, uintValue, String.format("%32s", Integer.toUnsignedString(value, 2)).replace(" ", "0"))
 
   def intValue = value
 
   def uintValue = Integer.toUnsignedLong(value)
+
+  def hexString = hex(value)
 }
 
 object Word32 extends Util {
+  def bytesToWords(bytes: Array[Byte]) = bytes.grouped(4).map(x => fromBytes(x)).toArray
+
   def fromBytes(bytes: Array[Byte]) = new Word32(ByteBuffer.wrap(bytes).getInt)
 
   def valueOf(s: String): Word32 = {
@@ -79,4 +82,13 @@ object Word32 extends Util {
   }
 
   def fromFloat(f: Float) = new Word32(bitsFromFloat(f))
+
+  def arrayToString(words: Array[Word32]): String = {
+    val sb: StringBuilder = new StringBuilder
+    words.grouped(4).foreach(x => {
+      x.foreach(x => sb.append(" ").append(x.hexString))
+      sb.append("\n")
+    })
+    sb.toString
+  }
 }

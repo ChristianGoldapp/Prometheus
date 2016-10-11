@@ -9,6 +9,8 @@ import data.Word32
 abstract class Instruction(opcode: OpCode, a1: Byte, a2: Byte, a3: Byte, lineform: String) {
   def getBytes: Array[Byte]
 
+  def getWords: Array[Word32] = Array(Word32.fromBytes(getBytes))
+
   def getOpCode = opcode
 
   def getWidth = 1
@@ -18,11 +20,12 @@ abstract class Instruction(opcode: OpCode, a1: Byte, a2: Byte, a3: Byte, linefor
 
 class NoWordInstruction(opcode: OpCode, arg1: Byte, arg2: Byte, arg3: Byte, lineform: String) extends Instruction(opcode: OpCode, arg1: Byte, arg2: Byte, arg3: Byte, lineform: String) {
   override def getBytes: Array[Byte] = Array(opcode.code, arg1, arg2, arg3)
-
   override def getWidth = 1
 }
 
 class OneWordInstruction(opcode: OpCode, arg1: Byte, arg2: Byte, arg3: Byte, w1: Word32, lineform: String) extends Instruction(opcode: OpCode, arg1: Byte, arg2: Byte, arg3: Byte, lineform: String) {
+
+  override def getWords: Array[Word32] = Word32.bytesToWords(getBytes)
 
   override def getBytes: Array[Byte] = {
     val w1bytes = w1.bytes()
@@ -58,5 +61,5 @@ class ThreeWordInstruction(opcode: OpCode, arg1: Byte, arg2: Byte, arg3: Byte, w
 
 //Placeholder for jumps as addresses are calculated later
 class JumpInstruction(opcode: OpCode, arg1: Byte, arg2: Byte, label: String, w1: Word32, w2: Word32, lineform: String) extends TwoWordInstruction(opcode: OpCode, arg1, arg2, 0x00, w1, w2, lineform: String) {
-  override def getBytes: Array[Byte] = Array(0.toByte)
+  override def getBytes: Array[Byte] = Array(opcode.code, arg1, arg2, 0xFF.toByte)
 }

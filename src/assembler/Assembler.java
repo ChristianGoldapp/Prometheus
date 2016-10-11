@@ -80,6 +80,9 @@ public class Assembler {
                 switch (tokens.length) {
                     case 3:
                         arg3 = parseArgument(tokens[2]);
+                        if (arg3 == (byte) 0xFF) {
+                            words.add(parseWord(tokens[1]));
+                        }
                     case 2:
                         arg2 = parseArgument(tokens[1]);
                         if (arg2 == (byte) 0xFF) {
@@ -101,6 +104,9 @@ public class Assembler {
                         break;
                     case 2:
                         instructions[i] = new TwoWordInstruction(op, arg1, arg2, arg3, words.get(0), words.get(1), line);
+                        break;
+                    case 3:
+                        instructions[i] = new ThreeWordInstruction(op, arg1, arg2, arg3, words.get(0), words.get(1), words.get(2), line);
                         break;
                     default:
                         throw new RuntimeException();
@@ -146,6 +152,9 @@ public class Assembler {
                     "SUB R0 0x1 R0\n" +
                     "JNZ R0 LOOP");
             System.out.println(Arrays.toString(i));
+            List<Word32> words = new ArrayList<>();
+            Arrays.stream(i).map(Instruction::getWords).map(Arrays::stream).forEach(x -> x.forEach(words::add));
+            System.out.println(Word32.arrayToString(words.toArray(new Word32[words.size()])));
         } catch (AssemblyException e) {
             e.printStackTrace();
         }
