@@ -46,15 +46,15 @@ public class Assembler {
                 switch (op) {
                     case JMP:
                         lbl = tokens[0];
-                        instructions[i] = new JumpInstruction(op, (byte) 0x0, (byte) 0x0, lbl, new Word32(0), new Word32(0), line);
+                        instructions[i] = new JumpInstruction(op, (byte) 0x0, (byte) 0x0, lbl, labels.get(lbl), new Word32(0), new Word32(0), line);
                         break;
                     case JEQ:
                         lbl = tokens[2];
-                        instructions[i] = new JumpInstruction(op, parseArgument(tokens[0]), parseArgument(tokens[1]), lbl, parseWord(tokens[0]), parseWord(tokens[1]), line);
+                        instructions[i] = new JumpInstruction(op, parseArgument(tokens[0]), parseArgument(tokens[1]), lbl, labels.get(lbl), parseWord(tokens[0]), parseWord(tokens[1]), line);
                         break;
                     default:
                         lbl = tokens[1];
-                        instructions[i] = new JumpInstruction(op, parseArgument(tokens[0]), (byte) 0x00, lbl, parseWord(tokens[0]), null, line);
+                        instructions[i] = new JumpInstruction(op, parseArgument(tokens[0]), (byte) 0x00, lbl, labels.get(lbl), parseWord(tokens[0]), null, line);
                 }
                 if (!labels.containsKey(lbl)) {
                     throw new AssemblyException(i, String.format("Encountered unknown label: %s", lbl));
@@ -116,7 +116,7 @@ public class Assembler {
         return instructions;
     }
 
-    public static byte parseArgument(String s) {
+    private static byte parseArgument(String s) {
         s = s.trim();
         byte b;
         if (s.startsWith("R")) {
@@ -127,7 +127,7 @@ public class Assembler {
         return b;
     }
 
-    public static Word32 parseWord(String s) {
+    private static Word32 parseWord(String s) {
         try {
             return Word32.valueOf(s);
         } catch (Exception e) {
