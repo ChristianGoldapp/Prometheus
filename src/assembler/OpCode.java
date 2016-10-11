@@ -25,15 +25,13 @@ public enum OpCode {
     //None
     NOOP(0x0F), WAIT(0x01), HALT(0x00),
     //String-Register
-    PUT(0x1A), U_PUT(0x1B), F_PUT(0x1C),
+    PUT(0x10), U_PUT(0x10), F_PUT(0x10),
     //String
     JMP(0xF0),
     //Value-String
-    JIZ(0xF1), JNZ(0xF2), JLZ(0xF3), JSZ(0xF4),
-    //Value-Value-String
-    JEQ(0xF5);
+    JIZ(0xF1), JNZ(0xF2), JLZ(0xF3), JSZ(0xF4);
 
-    static List<OpCode> jumps = Arrays.asList(JMP, JIZ, JNZ, JLZ, JSZ, JEQ);
+    static List<OpCode> jumps = Arrays.asList(JMP, JIZ, JNZ, JLZ, JSZ);
     static List<OpCode> literals = Arrays.asList(PUT, F_PUT, U_PUT);
     final byte code;
 

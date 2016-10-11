@@ -10,6 +10,10 @@ import java.util.stream.Collectors;
  * @version 1.0
  */
 public class Assembler {
+
+    private static final byte ALL_LOW = 0;
+    private static final byte ALL_HIGH = -1;
+    
     public static Instruction[] parse(String program) throws AssemblyException {
         //Split into lines, discard comments
         List<String> lList = Arrays.stream(program.split("\n")).filter(x -> !x.startsWith("//") && !x.startsWith("#")).collect(Collectors.toList());
@@ -46,15 +50,11 @@ public class Assembler {
                 switch (op) {
                     case JMP:
                         lbl = tokens[0];
-                        instructions[i] = new JumpInstruction(op, (byte) 0x0, (byte) 0x0, lbl, labels.get(lbl), new Word32(0), new Word32(0), line);
-                        break;
-                    case JEQ:
-                        lbl = tokens[2];
-                        instructions[i] = new JumpInstruction(op, parseArgument(tokens[0]), parseArgument(tokens[1]), lbl, labels.get(lbl), parseWord(tokens[0]), parseWord(tokens[1]), line);
+                        instructions[i] = new JumpInstruction(op, ALL_LOW, ALL_LOW, lbl, labels.get(lbl), new Word32(0), new Word32(0), line);
                         break;
                     default:
                         lbl = tokens[1];
-                        instructions[i] = new JumpInstruction(op, parseArgument(tokens[0]), (byte) 0x00, lbl, labels.get(lbl), parseWord(tokens[0]), null, line);
+                        instructions[i] = new JumpInstruction(op, parseArgument(tokens[0]), ALL_LOW, lbl, labels.get(lbl), parseWord(tokens[0]), null, line);
                 }
                 if (!labels.containsKey(lbl)) {
                     throw new AssemblyException(i, String.format("Encountered unknown label: %s", lbl));
@@ -62,39 +62,40 @@ public class Assembler {
             } else if (OpCode.literals.contains(op)) {
                 switch (op) {
                     case PUT:
-                        instructions[i] = new OneWordInstruction(OpCode.MOV, (byte) 0xFF, parseArgument(tokens[1]), (byte) 0, Word32.valueOf(tokens[0]), line);
+                        instructions[i] = new OneWordInstruction(OpCode.MOV, ALL_HIGH, parseArgument(tokens[1]), ALL_LOW, Word32.valueOf(tokens[0]), line);
                         break;
                     case F_PUT:
-                        instructions[i] = new OneWordInstruction(OpCode.MOV, (byte) 0xFF, parseArgument(tokens[1]), (byte) 0, Word32.fromFloat(Float.valueOf(tokens[0])), line);
+                        instructions[i] = new OneWordInstruction(OpCode.MOV, ALL_HIGH, parseArgument(tokens[1]), ALL_LOW, Word32.fromFloat(Float.valueOf(tokens[0])), line);
                         break;
                     case U_PUT:
-                        instructions[i] = new OneWordInstruction(OpCode.MOV, (byte) 0xFF, parseArgument(tokens[1]), (byte) 0, Word32.valueOf(tokens[0]), line);
+                        instructions[i] = new OneWordInstruction(OpCode.MOV, ALL_HIGH, parseArgument(tokens[1]), ALL_LOW, Word32.valueOf(tokens[0]), line);
                         break;
                 }
             } else {
-                byte arg1 = 0;
-                byte arg2 = 0;
-                byte arg3 = 0;
+                byte arg1 = ALL_LOW;
+                byte arg2 = ALL_LOW;
+                byte arg3 = ALL_LOW;
                 List<Word32> words = new ArrayList<>();
                 //Use fallthrough for easier recognition of arg count
                 switch (tokens.length) {
                     case 3:
                         arg3 = parseArgument(tokens[2]);
-                        if (arg3 == (byte) 0xFF) {
+                        if (arg3 == ALL_HIGH) {
                             words.add(parseWord(tokens[1]));
                         }
                     case 2:
                         arg2 = parseArgument(tokens[1]);
-                        if (arg2 == (byte) 0xFF) {
+                        if (arg2 == ALL_HIGH) {
                             words.add(parseWord(tokens[1]));
                         }
                     case 1:
                         arg1 = parseArgument(tokens[0]);
-                        if (arg1 == (byte) 0xFF) {
+                        if (arg1 == ALL_HIGH) {
                             words.add(parseWord(tokens[0]));
                         }
 
                 }
+                Collections.reverse(words);
                 switch (words.size()) {
                     case 0:
                         instructions[i] = new NoWordInstruction(op, arg1, arg2, arg3, line);
@@ -116,13 +117,71 @@ public class Assembler {
         return instructions;
     }
 
+    public static Word32[] assemble(Instruction[] instructions) {
+        List<Word32> words = new ArrayList<>();
+        //Shows the point at which every line begins
+        int[] pointers = new int[instructions.length];
+        int currentPos = 0;
+        for (int i = 0; i < instructions.length; i++) {
+            pointers[i] = currentPos;
+            currentPos = currentPos + instructions[i].getWidth();
+        }
+        for (int i = 0; i < instructions.length; i++) {
+            Instruction inst = instructions[i];
+            OpCode op = inst.getOpCode();
+            //We swap out every Jump instruction with the equivalent Jump to address.
+            if (inst instanceof JumpInstruction) {
+                JumpInstruction jInst = (JumpInstruction) inst;
+                switch (op) {
+                    case JMP:
+                        inst = new OneWordInstruction(OpCode.JAD, ALL_HIGH, ALL_LOW, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                        break;
+                    case JIZ:
+                        if (jInst.getArg1() == ALL_HIGH) {
+                            inst = new TwoWordInstruction(OpCode.JAIZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                        } else {
+                            inst = new OneWordInstruction(OpCode.JAIZ, jInst.getArg1(), ALL_LOW, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                        }
+                        break;
+                    case JNZ:
+                        if (jInst.getArg1() == ALL_HIGH) {
+                            inst = new TwoWordInstruction(OpCode.JANZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                        } else {
+                            inst = new OneWordInstruction(OpCode.JANZ, jInst.getArg1(), ALL_LOW, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                        }
+                        break;
+                    case JLZ:
+                        if (jInst.getArg1() == ALL_HIGH) {
+                            inst = new TwoWordInstruction(OpCode.JALZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                        } else {
+                            inst = new OneWordInstruction(OpCode.JALZ, jInst.getArg1(), ALL_LOW, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                        }
+                        break;
+                    case JSZ:
+                        if (jInst.getArg1() == ALL_HIGH) {
+                            inst = new TwoWordInstruction(OpCode.JASZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                        } else {
+                            inst = new OneWordInstruction(OpCode.JASZ, jInst.getArg1(), ALL_LOW, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                        }
+                        break;
+                    default:
+                        throw new RuntimeException();
+                }
+            }
+            Word32[] iWords = inst.getWords();
+            System.out.println(String.format("%20s %30s", inst.toString(), Word32.arrayToString(iWords)));
+            Collections.addAll(words, iWords);
+        }
+        return words.toArray(new Word32[words.size()]);
+    }
+
     private static byte parseArgument(String s) {
         s = s.trim();
         byte b;
         if (s.startsWith("R")) {
             b = Byte.valueOf(s.substring(1));
         } else {
-            b = (byte) 0xFF;
+            b = ALL_HIGH;
         }
         return b;
     }
@@ -151,10 +210,9 @@ public class Assembler {
                     "PUSH R3\n" +
                     "SUB R0 0x1 R0\n" +
                     "JNZ R0 LOOP");
+            Word32[] w = assemble(i);
             System.out.println(Arrays.toString(i));
-            List<Word32> words = new ArrayList<>();
-            Arrays.stream(i).map(Instruction::getWords).map(Arrays::stream).forEach(x -> x.forEach(words::add));
-            System.out.println(Word32.arrayToString(words.toArray(new Word32[words.size()])));
+            System.out.println(Word32.arrayToString(w));
         } catch (AssemblyException e) {
             e.printStackTrace();
         }
