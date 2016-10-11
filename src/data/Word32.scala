@@ -30,15 +30,15 @@ class Word32(rawValue: Int) extends Util {
 
   def fadd(that: Word32): Word32 = fop(that, a => b => a + b)
 
-  private def fop(that: Word32, op: FloatBinOp): Word32 = new Word32(bitsFromFloat(op(this.floatValue)(that.floatValue)))
-
-  def floatValue = floatFromBits(value)
-
   def fsub(that: Word32): Word32 = fop(that, a => b => a - b)
 
   def fmul(that: Word32): Word32 = fop(that, a => b => a * b)
 
   def fdiv(that: Word32): Word32 = fop(that, a => b => a / b)
+
+  private def fop(that: Word32, op: FloatBinOp): Word32 = new Word32(bitsFromFloat(op(this.floatValue)(that.floatValue)))
+
+  def floatValue = floatFromBits(value)
 
   def and(that: Word32): Word32 = new Word32(this.value & that.value)
 
@@ -77,7 +77,7 @@ object Word32 extends Util {
   def fromBytes(bytes: Array[Byte]) = new Word32(ByteBuffer.wrap(bytes).getInt)
 
   def valueOf(s: String): Word32 = {
-    if (s.startsWith("0x")) new Word32(Integer.parseUnsignedInt(s.substring(2)))
+    if (s.startsWith("0x")) new Word32(Integer.parseUnsignedInt(s.substring(2), 16))
     else new Word32(Integer.valueOf(s))
   }
 
@@ -85,7 +85,13 @@ object Word32 extends Util {
 
   def arrayToString(words: Array[Word32]): String = {
     val sb: StringBuilder = new StringBuilder
-    words.grouped(4).foreach(x => {
+    words.foreach(x => sb.append(" ").append(x.hexString))
+    sb.toString
+  }
+
+  def arrayToString(words: Array[Word32], row: Int): String = {
+    val sb: StringBuilder = new StringBuilder
+    words.grouped(row).foreach(x => {
       x.foreach(x => sb.append(" ").append(x.hexString))
       sb.append("\n")
     })
