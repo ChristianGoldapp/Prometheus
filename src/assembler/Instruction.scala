@@ -60,6 +60,8 @@ class ThreeWordInstruction(opcode: OpCode, arg1: Byte, arg2: Byte, arg3: Byte, w
 }
 
 //Placeholder for jumps as addresses are calculated later
-class JumpInstruction(opcode: OpCode, arg1: Byte, arg2: Byte, label: String, w1: Word32, w2: Word32, lineform: String) extends TwoWordInstruction(opcode: OpCode, arg1, arg2, 0x00, w1, w2, lineform: String) {
+class JumpInstruction(opcode: OpCode, arg1: Byte, arg2: Byte, label: String, jumpto: Int, w1: Word32, w2: Word32, lineform: String) extends TwoWordInstruction(opcode: OpCode, arg1, arg2, 0x00, w1, w2, lineform: String) {
   override def getBytes: Array[Byte] = Array(opcode.code, arg1, arg2, 0xFF.toByte)
+
+  def getJump = jumpto
 }
