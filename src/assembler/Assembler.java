@@ -117,6 +117,10 @@ public class Assembler {
         return instructions;
     }
 
+    public static Word32[] assemble(String program) throws AssemblyException {
+        return assemble(parse(program));
+    }
+
     public static Word32[] assemble(Instruction[] instructions) {
         List<Word32> words = new ArrayList<>();
         //Shows the point at which every line begins
