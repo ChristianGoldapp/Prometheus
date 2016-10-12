@@ -208,20 +208,22 @@ public class Processor implements Constants {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Register:\n");
+        sb.append("Registers:\n");
         for (int i = 0; i < registers.length; i++) {
-            sb.append("R");
+            sb.append(" R");
             sb.append(i);
-            sb.append(":   ");
-            sb.append(registers[i]);
+            sb.append(":        ");
+            sb.append(registers[i].hexString());
             sb.append("\n");
         }
+        sb.append("Stack:\n");
         for (int i = 0; i < stack.size(); i++) {
-            sb.append(String.format("0x%04X", i));
+            sb.append(String.format(" 0x%04X", i));
             sb.append(":   ");
-            sb.append(stack.get(i));
+            sb.append(stack.get(i).hexString());
             sb.append("\n");
         }
+        sb.append("Memory:\n");
         sb.append(Word32.arrayToString(memory, 16));
         return sb.toString();
     }

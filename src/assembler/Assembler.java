@@ -174,7 +174,7 @@ public class Assembler {
                 }
             }
             Word32[] iWords = inst.getWords();
-            System.out.println(String.format("%20s %30s", inst.toString(), Word32.arrayToString(iWords)));
+            System.out.println(String.format("%20s  :  %-30s", inst.toString(), Word32.arrayToString(iWords)));
             Collections.addAll(words, iWords);
         }
         return words.toArray(new Word32[words.size()]);
