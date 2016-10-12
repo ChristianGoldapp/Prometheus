@@ -33,7 +33,7 @@ public enum OpCode {
 
     static List<OpCode> jumps = Arrays.asList(JMP, JIZ, JNZ, JLZ, JSZ);
     static List<OpCode> literals = Arrays.asList(PUT, F_PUT, U_PUT);
-    final byte code;
+    public final byte code;
 
     OpCode(int i) {
         this.code = (byte) i;
@@ -59,5 +59,9 @@ public enum OpCode {
 
     public boolean isJump() {
         return jumps.contains(this);
+    }
+
+    public boolean isLiteral() {
+        return literals.contains(this);
     }
 }

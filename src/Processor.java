@@ -1,3 +1,5 @@
+import assembler.Assembler;
+import assembler.AssemblyException;
 import common.Constants;
 import common.OpCode;
 import common.Word32;
@@ -22,7 +24,9 @@ public class Processor implements Constants {
     public Processor(int memSize, int regSize) {
         this.executionPointer = 0;
         this.memory = new Word32[memSize];
+        Arrays.fill(memory, new Word32(0));
         this.registers = new Word32[regSize];
+        Arrays.fill(registers, new Word32(0));
         this.stack = new Stack<>();
     }
 
@@ -74,7 +78,7 @@ public class Processor implements Constants {
         if (arg3 == ALL_HIGH) {
             val3 = argWords.get(2);
         } else {
-            val2 = registers[arg3];
+            val3 = registers[arg3];
         }
         int nEP = executionPointer + 1 + argWords.size();
         switch (op) {
@@ -199,5 +203,42 @@ public class Processor implements Constants {
                 throw new RuntimeException();
         }
         return nEP;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Register:\n");
+        for (int i = 0; i < registers.length; i++) {
+            sb.append("R");
+            sb.append(i);
+            sb.append(":   ");
+            sb.append(registers[i]);
+            sb.append("\n");
+        }
+        for (int i = 0; i < stack.size(); i++) {
+            sb.append(String.format("0x%04X", i));
+            sb.append(":   ");
+            sb.append(stack.get(i));
+            sb.append("\n");
+        }
+        sb.append(Word32.arrayToString(memory, 16));
+        return sb.toString();
+    }
+}
+
+class Main {
+    public static void main(String[] args) throws AssemblyException {
+        Word32[] program = Assembler.assemble("PUT 10 R0\n" +
+                "PUT 10 R1\n" +
+                "ADD R0 R1 R2\n" +
+                "ADD R1 R2 R3\n" +
+                "ADD R2 R3 R4\n" +
+                "ADD R3 R4 R5\n" +
+                "PUSH R5");
+        Processor p = new Processor();
+        p.setProgram(program);
+        p.run();
+        System.out.println(p);
     }
 }
