@@ -56,4 +56,8 @@ public enum OpCode {
         }
         return null;
     }
+
+    public boolean isJump() {
+        return jumps.contains(this);
+    }
 }
