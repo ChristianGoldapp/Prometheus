@@ -1,6 +1,6 @@
 package assembler
 
-import common.Word32
+import common.{OpCode, Word32}
 
 /**
   * @author Christian Goldapp

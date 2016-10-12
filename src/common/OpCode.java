@@ -1,4 +1,4 @@
-package assembler;
+package common;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +39,7 @@ public enum OpCode {
         this.code = (byte) i;
     }
 
-    static OpCode get(String s) {
+    public static OpCode get(String s) {
         for (OpCode opCode : OpCode.values()) {
             if (opCode.toString().equalsIgnoreCase(s)) {
                 return opCode;
@@ -48,7 +48,7 @@ public enum OpCode {
         return null;
     }
 
-    static OpCode get(byte c) {
+    public static OpCode get(byte c) {
         for (OpCode opCode : OpCode.values()) {
             if (opCode.code == c) {
                 return opCode;

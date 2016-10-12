@@ -1,5 +1,6 @@
 package assembler;
 
+import common.OpCode;
 import common.Word32;
 
 import java.util.*;
