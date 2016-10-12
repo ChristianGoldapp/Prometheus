@@ -46,7 +46,7 @@ public class Assembler {
             //Take apart rest of line into tokens
             String[] tokens = scan.nextLine().trim().split(" ");
             //If the opcode is a jump, check if label exists
-            if (OpCode.jumps.contains(op)) {
+            if (op.isJump()) {
                 String lbl;
                 switch (op) {
                     case JMP:
@@ -60,7 +60,7 @@ public class Assembler {
                 if (!labels.containsKey(lbl)) {
                     throw new AssemblyException(i, String.format("Encountered unknown label: %s", lbl));
                 }
-            } else if (OpCode.literals.contains(op)) {
+            } else if (op.isLiteral()) {
                 switch (op) {
                     case PUT:
                         instructions[i] = new OneWordInstruction(OpCode.MOV, ALL_HIGH, parseArgument(tokens[1]), ALL_LOW, Word32.valueOf(tokens[0]), line);
