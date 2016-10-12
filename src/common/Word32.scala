@@ -52,15 +52,17 @@ class Word32(rawValue: Int) extends Util {
 
   def itof(): Word32 = new Word32(bitsFromFloat(floatValue))
 
-  def floatValue = floatFromBits(value)
-
   def itou(): Word32 = new Word32(Math.abs(value))
 
   def utoi(): Word32 = new Word32(if (value < 0) value + Int.MaxValue else value)
 
   def bytes(): Array[Byte] = bytesFromInt(value)
 
-  override def toString = "%s %10d %20f %11d %s".format(hex(value), intValue, floatValue, uintValue, String.format("%32s", Integer.toUnsignedString(value, 2)).replace(" ", "0"))
+  override def toString = "%s (%d)".format(hex(value), intValue)
+
+  def lineReport = "%s %10d %20f %11d %s".format(hex(value), intValue, floatValue, uintValue, String.format("%32s", Integer.toUnsignedString(value, 2)).replace(" ", "0"))
+
+  def floatValue = floatFromBits(value)
 
   def intValue = value
 

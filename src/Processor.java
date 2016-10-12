@@ -49,38 +49,51 @@ public class Processor implements Constants {
         Word32 firstWord = memory[executionPointer];
         byte[] firstWordBytes = firstWord.bytes();
         OpCode op = OpCode.get(firstWordBytes[0]);
+        if (op == OpCode.HALT) {
+            return -1;
+        }
         byte arg1 = firstWordBytes[1];
         byte arg2 = firstWordBytes[2];
         byte arg3 = firstWordBytes[3];
+        if (arg3 > 10) {
+            System.out.println(arg3);
+        }
         List<Word32> argWords = new ArrayList<>(3);
+        int argCount = 0;
         if (arg1 == ALL_HIGH) {
             argWords.add(memory[executionPointer + argWords.size() + 1]);
+            argCount++;
         }
         if (arg2 == ALL_HIGH) {
             argWords.add(memory[executionPointer + argWords.size() + 1]);
+            argCount++;
         }
         if (arg3 == ALL_HIGH) {
             argWords.add(memory[executionPointer + argWords.size() + 1]);
+            argCount++;
         }
         Word32 val1;
         if (arg1 == ALL_HIGH) {
             val1 = argWords.get(0);
+            argWords.remove(0);
         } else {
             val1 = registers[arg1];
         }
         Word32 val2;
         if (arg2 == ALL_HIGH) {
-            val2 = argWords.get(1);
+            val2 = argWords.get(0);
+            argWords.remove(0);
         } else {
             val2 = registers[arg2];
         }
         Word32 val3;
         if (arg3 == ALL_HIGH) {
-            val3 = argWords.get(2);
+            val3 = argWords.get(0);
+            argWords.remove(0);
         } else {
             val3 = registers[arg3];
         }
-        int nEP = executionPointer + 1 + argWords.size();
+        int nEP = executionPointer + 1 + argCount;
         switch (op) {
             case MOV:
                 registers[arg2] = val1;
@@ -174,16 +187,24 @@ public class Processor implements Constants {
                 registers[arg3] = val1.xor(val2);
                 break;
             case JAIZ:
-                //TODO
+                if (val1.value() == 0) {
+                    nEP = val2.intValue();
+                }
                 break;
             case JANZ:
-                //TODO
+                if (val1.value() != 0) {
+                    nEP = val2.intValue();
+                }
                 break;
             case JALZ:
-                //TODO
+                if (val1.value() > 0) {
+                    nEP = val2.intValue();
+                }
                 break;
             case JASZ:
-                //TODO
+                if (val1.value() < 0) {
+                    nEP = val2.intValue();
+                }
                 break;
             case SYSCALL:
                 //TODO
@@ -205,6 +226,10 @@ public class Processor implements Constants {
         return nEP;
     }
 
+    private void syscall(Word32 call, Word32 argument) {
+        //TODO
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -213,14 +238,14 @@ public class Processor implements Constants {
             sb.append(" R");
             sb.append(i);
             sb.append(":        ");
-            sb.append(registers[i].hexString());
+            sb.append(registers[i]);
             sb.append("\n");
         }
         sb.append("Stack:\n");
-        for (int i = 0; i < stack.size(); i++) {
+        for (int i = stack.size() - 1; i >= 0; i--) {
             sb.append(String.format(" 0x%04X", i));
             sb.append(":   ");
-            sb.append(stack.get(i).hexString());
+            sb.append(stack.get(i));
             sb.append("\n");
         }
         sb.append("Memory:\n");
@@ -231,13 +256,19 @@ public class Processor implements Constants {
 
 class Main {
     public static void main(String[] args) throws AssemblyException {
-        Word32[] program = Assembler.assemble("PUT 10 R0\n" +
-                "PUT 10 R1\n" +
-                "ADD R0 R1 R2\n" +
+        Word32[] program = Assembler.assemble("MOV 0xA R9\n" +
+                "MOV R9 R0\n" +
+                "PUSH 0x1\n" +
+                "PUSH 0x1\n" +
+                "_LOOP POP R1\n" +
+                "POP R2\n" +
                 "ADD R1 R2 R3\n" +
-                "ADD R2 R3 R4\n" +
-                "ADD R3 R4 R5\n" +
-                "PUSH R5");
+                "SUB R9 R0 R4\n" +
+                "PUSH R2\n" +
+                "PUSH R1\n" +
+                "PUSH R3\n" +
+                "SUB R0 0x1 R0\n" +
+                "JNZ R0 LOOP");
         Processor p = new Processor();
         p.setProgram(program);
         p.run();
