@@ -55,9 +55,6 @@ public class Processor implements Constants {
         byte arg1 = firstWordBytes[1];
         byte arg2 = firstWordBytes[2];
         byte arg3 = firstWordBytes[3];
-        if (arg3 > 10) {
-            System.out.println(arg3);
-        }
         List<Word32> argWords = new ArrayList<>(3);
         int argCount = 0;
         if (arg1 == ALL_HIGH) {
