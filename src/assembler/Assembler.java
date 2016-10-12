@@ -1,6 +1,6 @@
 package assembler;
 
-import data.Word32;
+import common.Word32;
 
 import java.util.*;
 import java.util.stream.Collectors;

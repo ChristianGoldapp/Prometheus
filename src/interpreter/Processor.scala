@@ -2,8 +2,7 @@ package interpreter
 
 import java.util.Scanner
 
-import common.Util
-import data.Word32
+import common.{Util, Word32}
 
 import scala.collection.mutable
 

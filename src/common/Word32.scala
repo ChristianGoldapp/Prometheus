@@ -1,8 +1,6 @@
-package data
+package common
 
 import java.nio.ByteBuffer
-
-import common.Util
 
 /**
   * @author Chris Gold
@@ -38,8 +36,6 @@ class Word32(rawValue: Int) extends Util {
 
   private def fop(that: Word32, op: FloatBinOp): Word32 = new Word32(bitsFromFloat(op(this.floatValue)(that.floatValue)))
 
-  def floatValue = floatFromBits(value)
-
   def and(that: Word32): Word32 = new Word32(this.value & that.value)
 
   def or(that: Word32): Word32 = new Word32(this.value | that.value)
@@ -55,6 +51,8 @@ class Word32(rawValue: Int) extends Util {
   def ftoi(): Word32 = new Word32(this.floatValue.toInt)
 
   def itof(): Word32 = new Word32(bitsFromFloat(floatValue))
+
+  def floatValue = floatFromBits(value)
 
   def itou(): Word32 = new Word32(Math.abs(value))
 
