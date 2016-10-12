@@ -143,30 +143,30 @@ public class Assembler {
                         break;
                     case JIZ:
                         if (jInst.getArg1() == ALL_HIGH) {
-                            inst = new TwoWordInstruction(OpCode.JAIZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                            inst = new TwoWordInstruction(OpCode.JAIZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
                         } else {
-                            inst = new OneWordInstruction(OpCode.JAIZ, jInst.getArg1(), ALL_LOW, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                            inst = new OneWordInstruction(OpCode.JAIZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
                         }
                         break;
                     case JNZ:
                         if (jInst.getArg1() == ALL_HIGH) {
-                            inst = new TwoWordInstruction(OpCode.JANZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                            inst = new TwoWordInstruction(OpCode.JANZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
                         } else {
-                            inst = new OneWordInstruction(OpCode.JANZ, jInst.getArg1(), ALL_LOW, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                            inst = new OneWordInstruction(OpCode.JANZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
                         }
                         break;
                     case JLZ:
                         if (jInst.getArg1() == ALL_HIGH) {
-                            inst = new TwoWordInstruction(OpCode.JALZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                            inst = new TwoWordInstruction(OpCode.JALZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
                         } else {
-                            inst = new OneWordInstruction(OpCode.JALZ, jInst.getArg1(), ALL_LOW, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                            inst = new OneWordInstruction(OpCode.JALZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
                         }
                         break;
                     case JSZ:
                         if (jInst.getArg1() == ALL_HIGH) {
-                            inst = new TwoWordInstruction(OpCode.JASZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                            inst = new TwoWordInstruction(OpCode.JASZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getWord1(), new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
                         } else {
-                            inst = new OneWordInstruction(OpCode.JASZ, jInst.getArg1(), ALL_LOW, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
+                            inst = new OneWordInstruction(OpCode.JASZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, new Word32(pointers[jInst.getJump()]), jInst.toString() + " CONV");
                         }
                         break;
                     default:
