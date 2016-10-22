@@ -130,7 +130,10 @@ public class Processor implements Constants {
                 stack.push(val1);
                 break;
             case JAD:
-                //TODO
+                nEP = val1.intValue();
+                break;
+            case JOF:
+                nEP = executionPointer + val1.intValue();
                 break;
             case POP:
                 registers[arg1] = stack.pop();
@@ -203,11 +206,33 @@ public class Processor implements Constants {
                     nEP = val2.intValue();
                 }
                 break;
+            case JOIZ:
+                if (val1.value() == 0) {
+                    nEP = executionPointer + val1.intValue();
+                }
+                break;
+            case JONZ:
+                if (val1.value() != 0) {
+                    nEP = executionPointer + val1.intValue();
+                }
+                break;
+            case JOLZ:
+                if (val1.value() > 0) {
+                    nEP = executionPointer + val1.intValue();
+                }
+                break;
+            case JOSZ:
+                if (val1.value() < 0) {
+                    nEP = executionPointer + val1.intValue();
+                }
+                break;
             case SYSCALL:
-                //TODO
+                syscall(val1, val2);
                 break;
             case JAEQ:
-                //TODO
+                if (val1.value() == val2.value()) {
+                    nEP = val3.intValue();
+                }
                 break;
             case NOOP:
                 break;
@@ -253,17 +278,13 @@ public class Processor implements Constants {
 
 class Main {
     public static void main(String[] args) throws AssemblyException {
-        Word32[] program = Assembler.assemble("MOV 0xA R9\n" +
-                "MOV R9 R0\n" +
-                "PUSH 0x1\n" +
-                "PUSH 0x1\n" +
-                "_LOOP POP R1\n" +
-                "POP R2\n" +
-                "ADD R1 R2 R3\n" +
-                "SUB R9 R0 R4\n" +
-                "PUSH R2\n" +
-                "PUSH R1\n" +
-                "PUSH R3\n" +
+        Word32[] program = Assembler.assemble("#Place a in R1 and x in R9.\n" +
+                "F_PUT 10.0 R1\n" +
+                "F_PUT 100.0 R9\n" +
+                "PUT 1000 R0\n" +
+                "_LOOP F_DIV R9 R1 R2\n" +
+                "F_ADD R1 R2 R1\n" +
+                "F_MUL R1 0x3f000000 R1\n" +
                 "SUB R0 0x1 R0\n" +
                 "JNZ R0 LOOP");
         Processor p = new Processor();
