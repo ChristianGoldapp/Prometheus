@@ -52,186 +52,168 @@ public class Processor implements Constants {
         if (op == OpCode.HALT) {
             return -1;
         }
-        byte arg1 = firstWordBytes[1];
-        byte arg2 = firstWordBytes[2];
-        byte arg3 = firstWordBytes[3];
         List<Word32> argWords = new ArrayList<>(3);
         int argCount = 0;
-        if (arg1 == ALL_HIGH) {
-            argWords.add(memory[executionPointer + argWords.size() + 1]);
-            argCount++;
+        byte[] args = new byte[3];
+        System.arraycopy(firstWordBytes, 1, args, 0, firstWordBytes.length - 1);
+        for (byte arg : args) {
+            if (arg == ALL_HIGH) {
+                argWords.add(memory[executionPointer + argWords.size() + 1]);
+                argCount++;
+            }
         }
-        if (arg2 == ALL_HIGH) {
-            argWords.add(memory[executionPointer + argWords.size() + 1]);
-            argCount++;
-        }
-        if (arg3 == ALL_HIGH) {
-            argWords.add(memory[executionPointer + argWords.size() + 1]);
-            argCount++;
-        }
-        Word32 val1;
-        if (arg1 == ALL_HIGH) {
-            val1 = argWords.get(0);
-            argWords.remove(0);
-        } else {
-            val1 = registers[arg1];
-        }
-        Word32 val2;
-        if (arg2 == ALL_HIGH) {
-            val2 = argWords.get(0);
-            argWords.remove(0);
-        } else {
-            val2 = registers[arg2];
-        }
-        Word32 val3;
-        if (arg3 == ALL_HIGH) {
-            val3 = argWords.get(0);
-            argWords.remove(0);
-        } else {
-            val3 = registers[arg3];
+        Word32[] vals = new Word32[3];
+        for (int i = 0; i < args.length; i++) {
+            byte arg = args[i];
+            if (arg == ALL_HIGH) {
+                vals[i] = argWords.get(0);
+                argWords.remove(0);
+            } else {
+                vals[i] = registers[args[i]];
+            }
         }
         int nEP = executionPointer + 1 + argCount;
         switch (op) {
             case MOV:
-                registers[arg2] = val1;
+                registers[args[1]] = vals[0];
                 break;
             case LOAD:
-                registers[arg2] = memory[val1.intValue()];
+                registers[args[1]] = memory[vals[0].intValue()];
                 break;
             case SAVE:
-                memory[val1.intValue()] = registers[arg2];
+                memory[vals[0].intValue()] = registers[args[1]];
                 break;
             case NOT:
-                registers[arg2] = val1.not();
+                registers[args[1]] = vals[0].not();
                 break;
             case LSHIFT:
-                registers[arg2] = val1.lshift();
+                registers[args[1]] = vals[0].lshift();
                 break;
             case RSHIFT:
-                registers[arg2] = val1.rshift();
+                registers[args[1]] = vals[0].rshift();
                 break;
             case FTOI:
-                registers[arg2] = val1.ftoi();
+                registers[args[1]] = vals[0].ftoi();
                 break;
             case ITOF:
-                registers[arg2] = val1.itof();
+                registers[args[1]] = vals[0].itof();
                 break;
             case UTOI:
-                registers[arg2] = val1.utoi();
+                registers[args[1]] = vals[0].utoi();
                 break;
             case ITOU:
-                registers[arg2] = val1.itou();
+                registers[args[1]] = vals[0].itou();
                 break;
             case SWP:
-                registers[arg1] = val2;
-                registers[arg2] = val1;
+                registers[args[0]] = vals[1];
+                registers[args[1]] = vals[0];
                 break;
             case PUSH:
-                stack.push(val1);
+                stack.push(vals[0]);
                 break;
             case JAD:
-                nEP = val1.intValue();
+                nEP = vals[0].intValue();
                 break;
             case JOF:
-                nEP = executionPointer + val1.intValue();
+                nEP = executionPointer + vals[0].intValue();
                 break;
             case POP:
-                registers[arg1] = stack.pop();
+                registers[args[0]] = stack.pop();
                 break;
             case PEEK:
-                registers[arg1] = stack.peek();
+                registers[args[0]] = stack.peek();
                 break;
             case ADD:
-                registers[arg3] = val1.add(val2);
+                registers[args[2]] = vals[0].add(vals[1]);
                 break;
             case SUB:
-                registers[arg3] = val1.sub(val2);
+                registers[args[2]] = vals[0].sub(vals[1]);
                 break;
             case MUL:
-                registers[arg3] = val1.mul(val2);
+                registers[args[2]] = vals[0].mul(vals[1]);
                 break;
             case DIV:
-                registers[arg3] = val1.div(val2);
+                registers[args[2]] = vals[0].div(vals[1]);
                 break;
             case U_ADD:
-                registers[arg3] = val1.uadd(val2);
+                registers[args[2]] = vals[0].uadd(vals[1]);
                 break;
             case U_SUB:
-                registers[arg3] = val1.usub(val2);
+                registers[args[2]] = vals[0].usub(vals[1]);
                 break;
             case U_MUL:
-                registers[arg3] = val1.umul(val2);
+                registers[args[2]] = vals[0].umul(vals[1]);
                 break;
             case U_DIV:
-                registers[arg3] = val1.udiv(val2);
+                registers[args[2]] = vals[0].udiv(vals[1]);
                 break;
             case F_ADD:
-                registers[arg3] = val1.fadd(val2);
+                registers[args[2]] = vals[0].fadd(vals[1]);
                 break;
             case F_SUB:
-                registers[arg3] = val1.fsub(val2);
+                registers[args[2]] = vals[0].fsub(vals[1]);
                 break;
             case F_MUL:
-                registers[arg3] = val1.fmul(val2);
+                registers[args[2]] = vals[0].fmul(vals[1]);
                 break;
             case F_DIV:
-                registers[arg3] = val1.fdiv(val2);
+                registers[args[2]] = vals[0].fdiv(vals[1]);
                 break;
             case AND:
-                registers[arg3] = val1.and(val2);
+                registers[args[2]] = vals[0].and(vals[1]);
                 break;
             case OR:
-                registers[arg3] = val1.or(val2);
+                registers[args[2]] = vals[0].or(vals[1]);
                 break;
             case XOR:
-                registers[arg3] = val1.xor(val2);
+                registers[args[2]] = vals[0].xor(vals[1]);
                 break;
             case JAIZ:
-                if (val1.value() == 0) {
-                    nEP = val2.intValue();
+                if (vals[0].value() == 0) {
+                    nEP = vals[1].intValue();
                 }
                 break;
             case JANZ:
-                if (val1.value() != 0) {
-                    nEP = val2.intValue();
+                if (vals[0].value() != 0) {
+                    nEP = vals[1].intValue();
                 }
                 break;
             case JALZ:
-                if (val1.value() > 0) {
-                    nEP = val2.intValue();
+                if (vals[0].value() > 0) {
+                    nEP = vals[1].intValue();
                 }
                 break;
             case JASZ:
-                if (val1.value() < 0) {
-                    nEP = val2.intValue();
+                if (vals[0].value() < 0) {
+                    nEP = vals[1].intValue();
                 }
                 break;
             case JOIZ:
-                if (val1.value() == 0) {
-                    nEP = executionPointer + val2.intValue();
+                if (vals[0].value() == 0) {
+                    nEP = executionPointer + vals[1].intValue();
                 }
                 break;
             case JONZ:
-                if (val1.value() != 0) {
-                    nEP = executionPointer + val2.intValue();
+                if (vals[0].value() != 0) {
+                    nEP = executionPointer + vals[1].intValue();
                 }
                 break;
             case JOLZ:
-                if (val1.value() > 0) {
-                    nEP = executionPointer + val2.intValue();
+                if (vals[0].value() > 0) {
+                    nEP = executionPointer + vals[1].intValue();
                 }
                 break;
             case JOSZ:
-                if (val1.value() < 0) {
-                    nEP = executionPointer + val2.intValue();
+                if (vals[0].value() < 0) {
+                    nEP = executionPointer + vals[1].intValue();
                 }
                 break;
             case SYSCALL:
-                syscall(val1, val2);
+                syscall(vals[0], vals[1]);
                 break;
             case JAEQ:
-                if (val1.value() == val2.value()) {
-                    nEP = val3.intValue();
+                if (vals[0].value() == vals[1].value()) {
+                    nEP = vals[2].intValue();
                 }
                 break;
             case NOOP:
