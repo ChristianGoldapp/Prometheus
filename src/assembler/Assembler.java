@@ -14,11 +14,11 @@ public class Assembler {
 
     private static final byte ALL_LOW = 0;
     private static final byte ALL_HIGH = -1;
-    
-    public static Instruction[] parse(String program) throws AssemblyException {
+
+    public static Instruction[] parse(String[] lines) throws AssemblyException {
         //Split into lines, discard comments
-        List<String> lList = Arrays.stream(program.split("\n")).filter(x -> !x.startsWith("//") && !x.startsWith("#")).collect(Collectors.toList());
-        String[] lines = lList.toArray(new String[lList.size()]);
+        List<String> lList = Arrays.stream(lines).filter(x -> !x.startsWith("//") && !x.startsWith("#")).collect(Collectors.toList());
+        lines = lList.toArray(new String[lList.size()]);
         //Read in labels
         //Map from label to line number
         final Map<String, Integer> labels = new HashMap<>();
@@ -118,6 +118,9 @@ public class Assembler {
         return instructions;
     }
 
+    public static Instruction[] parse(String program) throws AssemblyException {
+        return parse(program.split("\n"));
+    }
     public static Word32[] assemble(String program) throws AssemblyException {
         return assemble(parse(program));
     }

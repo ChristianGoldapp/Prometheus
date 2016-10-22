@@ -1,5 +1,3 @@
-import assembler.Assembler;
-import assembler.AssemblyException;
 import common.Constants;
 import common.OpCode;
 import common.Word32;
@@ -255,23 +253,5 @@ public class Processor implements Constants {
         sb.append("Memory:\n");
         sb.append(Word32.arrayToString(memory, 16));
         return sb.toString();
-    }
-}
-
-class Main {
-    public static void main(String[] args) throws AssemblyException {
-        Word32[] program = Assembler.assemble("#Place a in R1 and x in R9.\n" +
-                "F_PUT 10.0 R1\n" +
-                "F_PUT 100.0 R9\n" +
-                "PUT 1000 R0\n" +
-                "_LOOP F_DIV R9 R1 R2\n" +
-                "F_ADD R1 R2 R1\n" +
-                "F_MUL R1 0x3f000000 R1\n" +
-                "SUB R0 0x1 R0\n" +
-                "JNZ R0 LOOP");
-        Processor p = new Processor();
-        p.setProgram(program);
-        p.run();
-        System.out.println(p);
     }
 }
