@@ -208,22 +208,22 @@ public class Processor implements Constants {
                 break;
             case JOIZ:
                 if (val1.value() == 0) {
-                    nEP = executionPointer + val1.intValue();
+                    nEP = executionPointer + val2.intValue();
                 }
                 break;
             case JONZ:
                 if (val1.value() != 0) {
-                    nEP = executionPointer + val1.intValue();
+                    nEP = executionPointer + val2.intValue();
                 }
                 break;
             case JOLZ:
                 if (val1.value() > 0) {
-                    nEP = executionPointer + val1.intValue();
+                    nEP = executionPointer + val2.intValue();
                 }
                 break;
             case JOSZ:
                 if (val1.value() < 0) {
-                    nEP = executionPointer + val1.intValue();
+                    nEP = executionPointer + val2.intValue();
                 }
                 break;
             case SYSCALL:

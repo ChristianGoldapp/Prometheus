@@ -138,7 +138,8 @@ public class Assembler {
             if (inst instanceof JumpInstruction) {
                 JumpInstruction jInst = (JumpInstruction) inst;
                 int jumpToLine = pointers[jInst.getJump()];
-                int offset = jumpToLine - i;
+                int currentLine = pointers[i];
+                int offset = jumpToLine - currentLine;
                 Word32 address = new Word32(offset);
                 switch (op) {
                     case JMP:
