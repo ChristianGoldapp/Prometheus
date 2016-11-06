@@ -121,6 +121,7 @@ public class Assembler {
     public static Instruction[] parse(String program) throws AssemblyException {
         return parse(program.split("\n"));
     }
+
     public static Word32[] assemble(String program) throws AssemblyException {
         return assemble(parse(program));
     }
@@ -206,27 +207,4 @@ public class Assembler {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            Instruction[] i = parse("PUT 32 R9\n" +
-                    "MOV R9 R0\n" +
-                    "PUSH 0x1\n" +
-                    "PUSH 0x1\n" +
-                    "_LOOP POP R1\n" +
-                    "POP R2\n" +
-                    "ADD R1 R2 R3\n" +
-                    "SUB R9 R0 R4\n" +
-                    "SAVE R4 R3\n" +
-                    "PUSH R2\n" +
-                    "PUSH R1\n" +
-                    "PUSH R3\n" +
-                    "SUB R0 0x1 R0\n" +
-                    "JNZ R0 LOOP");
-            Word32[] w = assemble(i);
-            System.out.println(Arrays.toString(i));
-            System.out.println(Word32.arrayToString(w));
-        } catch (AssemblyException e) {
-            e.printStackTrace();
-        }
-    }
 }
