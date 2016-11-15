@@ -76,6 +76,10 @@ Instructions can be prepended with a label, that is signalled with a leading "_"
 | 0x53 | XOR | VAL | VAL | REG | XOR the bits of value arg1 with the value arg2 and write result into register arg3 |
 | 0x5E | LSHIFT | VAL | REG |  | Left-shift the bits of value arg1 and write result into register arg3 (undefined bits are set to 0)|
 | 0x5F | RHIFT | VAL | REG |  | Right-shift the bits of value arg1 and write result into register arg3 (undefined bits are set to 0)|
+| 0x60 | FTOI | VAL | REG |  | Convert the float value arg1 into an integer and write result into register arg2 |
+| 0x61 | ITOF | VAL | REG |  | Convert the integer value arg1 into a float and write result into register arg2 |
+| 0x62 | UTOI | VAL | REG |  | Convert the unsigned value arg1 into an integer and write result into register arg2 |
+| 0x63 | ITOU | VAL | REG |  | Convert the integer value arg1 into an unsigned integer and write result into register arg2 |
 | 0x70 | PEEK | REG | |  | Copy the top value of the stack into the register arg1 |
 | 0x71 | PUSH | VAL | |  | Push the value arg1 onto the stack|
 | 0x72 | POP | REG | |  | Copy the top value of the stack into the register arg1 and then remove it from the stack|
