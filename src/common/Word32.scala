@@ -36,6 +36,8 @@ class Word32(rawValue: Int) extends Util {
 
   private def fop(that: Word32, op: FloatBinOp): Word32 = new Word32(bitsFromFloat(op(this.floatValue)(that.floatValue)))
 
+  def floatValue = floatFromBits(value)
+
   def and(that: Word32): Word32 = new Word32(this.value & that.value)
 
   def or(that: Word32): Word32 = new Word32(this.value | that.value)
@@ -60,11 +62,9 @@ class Word32(rawValue: Int) extends Util {
 
   override def toString = "%s (%d)".format(hex(value), intValue)
 
-  def lineReport = "%s %10d %20f %11d %s".format(hex(value), intValue, floatValue, uintValue, String.format("%32s", Integer.toUnsignedString(value, 2)).replace(" ", "0"))
-
-  def floatValue = floatFromBits(value)
-
   def intValue = value
+
+  def lineReport = "%s %10d %20f %11d %s".format(hex(value), intValue, floatValue, uintValue, String.format("%32s", Integer.toUnsignedString(value, 2)).replace(" ", "0"))
 
   def uintValue = Integer.toUnsignedLong(value)
 
@@ -75,6 +75,8 @@ object Word32 extends Util {
   def bytesToWords(bytes: Array[Byte]) = bytes.grouped(4).map(x => fromBytes(x)).toArray
 
   def fromBytes(bytes: Array[Byte]) = new Word32(ByteBuffer.wrap(bytes).getInt)
+
+  def wordsToBytes(words: Array[Word32]) = words.flatMap(x => x.bytes().toList)
 
   def valueOf(s: String): Word32 = {
     if (s.startsWith("0x")) new Word32(Integer.parseUnsignedInt(s.substring(2), 16))
