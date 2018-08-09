@@ -69,6 +69,8 @@ class Word32(rawValue: Int) extends Util {
   def uintValue = Integer.toUnsignedLong(value)
 
   def hexString = hex(value)
+
+  def equals(that: Word32) = this.value == that.value
 }
 
 object Word32 extends Util {
