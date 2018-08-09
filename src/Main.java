@@ -14,6 +14,7 @@ import java.util.List;
  */
 class Main {
     public static void main(String[] args) throws AssemblyException, IOException {
+        assembleAndExecute(new File(args[0]));
     }
 
     private static Word32[] readWordsFromFile(File f) throws IOException {
@@ -30,7 +31,6 @@ class Main {
         String assembly = f.getName().split(".")[0] + ".pro";
         List<String> lines = Files.readAllLines(f.toPath(), Charset.defaultCharset());
         Word32[] program = Assembler.assemble(Assembler.parse(lines.toArray(new String[lines.size()])));
-
     }
 
     private static void assembleAndExecute(File f) throws IOException, AssemblyException {

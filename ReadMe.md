@@ -34,7 +34,7 @@ The execution pointer always points to the first word of the next instruction to
 
 ## Instructions ##
 
-###Instruction Format###
+###Instruction Format 
 
 An instruction is an OpCode, followed by up to three arguments. An argument can be:
 
@@ -98,7 +98,7 @@ Instructions can be prepended with a label, that is signalled with a leading "_"
 | 0xF2 | JANZ | LBL | REG |  | Jump to address arg1 if register arg1 is not zero|
 | 0xF3 | JALZ | LBL | REG |  | Jump to address arg1 if register arg1 larger than zero|
 | 0xF4 | JASZ | LBL | REG |  | Jump to address arg1 if register arg1 smaller than zero|
-| 0xFE | SYSCALL | VAL | VAL |  | Make syscall arg1 with argument arg2| Not implemented yet|
+| 0xFE | SYSCALL | VAL | VAL | REG | Make syscall arg1 with argument arg2| Not implemented yet|
 
 The PUT, U_PUT, F_PUT, JMP, JIZ, JNZ, JLZ and JSZ are turned into MOV and Jump-to-Address instructions during assembly and thus never appear directly in the bytecode.
 
@@ -131,7 +131,13 @@ Every instruction consists of 1 to 4 words. The first word is the so-called "Op-
     0x71030000 0x2100FF00 0x00000001 0xE200FF00 
     0xFFFFFFF8
 
-## 4. Output ##
+## 4. Syscalls ##
+
+Every syscall is called with an address, an argument and a register for the result.
+
+|Call address||
+
+## 5. Output ##
 
 Since I have not yet added I/O functions (which will arrive via SYSCALL and WAIT), I make do by printing the state of the processor out to stdin after execution is complete. The assembler also prints its result out. (Note that CONV denotes an opcode for which the original mnemonic has been preserved, even though the assembler changed the opcode into another one in the binary.)
 

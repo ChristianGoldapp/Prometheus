@@ -2,10 +2,7 @@ import common.Constants;
 import common.OpCode;
 import common.Word32;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * @author Chris Gold
@@ -14,6 +11,7 @@ import java.util.Stack;
 public class Processor implements Constants {
     public static final int DEFAULT_MEMSIZE = 2 << 8;
     public static final int DEFAULT_REGSIZE = 10;
+    private final Scanner stdin = new Scanner(System.in);
     private final Word32[] memory;
     private final Word32[] registers;
     private final Stack<Word32> stack;
@@ -207,7 +205,6 @@ public class Processor implements Constants {
                 }
                 break;
             case SYSCALL:
-                syscall(vals[0], vals[1]);
                 break;
             case JAEQ:
                 if (vals[0].value() == vals[1].value()) {
@@ -226,10 +223,6 @@ public class Processor implements Constants {
                 throw new RuntimeException();
         }
         return nEP;
-    }
-
-    private void syscall(Word32 call, Word32 argument) {
-        //TODO
     }
 
     @Override
@@ -254,4 +247,5 @@ public class Processor implements Constants {
         sb.append(Word32.arrayToString(memory, 16));
         return sb.toString();
     }
+
 }
