@@ -55,7 +55,7 @@ public class Assembler {
                         break;
                     default:
                         lbl = tokens[1];
-                        instructions[i] = new JumpInstruction(op, parseArgument(tokens[0]), ALL_LOW, lbl, labels.get(lbl), parseWord(tokens[0]), null, line);
+                        instructions[i] = new JumpInstruction(op, parseArgument(tokens[0]), ALL_LOW, lbl, labels.get(lbl), parseWord(tokens[0]), Word32.getZEROES(), line);
                 }
                 if (!labels.containsKey(lbl)) {
                     throw new AssemblyException(i, String.format("Encountered unknown label: %s", lbl));
@@ -203,7 +203,7 @@ public class Assembler {
         try {
             return Word32.valueOf(s);
         } catch (Exception e) {
-            return null;
+            return Word32.getZEROES();
         }
     }
 

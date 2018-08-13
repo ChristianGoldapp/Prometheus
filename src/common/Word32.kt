@@ -104,6 +104,12 @@ class Word32(rawValue: Int) {
             })
             return sb.toString()
         }
+
+        @JvmStatic
+        val ONES = Word32(0.inv())
+
+        @JvmStatic
+        val ZEROES = Word32(0)
     }
 }
 
