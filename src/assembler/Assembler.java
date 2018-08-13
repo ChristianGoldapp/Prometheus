@@ -141,7 +141,7 @@ public class Assembler {
             //We swap out every Jump instruction with the equivalent Jump to offset.
             if (inst instanceof JumpInstruction) {
                 JumpInstruction jInst = (JumpInstruction) inst;
-                int jumpToLine = pointers[jInst.getJump()];
+                int jumpToLine = pointers[jInst.getJumpto()];
                 int currentLine = pointers[i];
                 int offset = jumpToLine - currentLine;
                 Word32 address = new Word32(offset);
@@ -151,28 +151,28 @@ public class Assembler {
                         break;
                     case JIZ:
                         if (jInst.getArg1() == ALL_HIGH) {
-                            inst = new TwoWordInstruction(OpCode.JOIZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getWord1(), address, jInst.toString() + " CONV");
+                            inst = new TwoWordInstruction(OpCode.JOIZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getW1(), address, jInst.toString() + " CONV");
                         } else {
                             inst = new OneWordInstruction(OpCode.JOIZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, address, jInst.toString() + " CONV");
                         }
                         break;
                     case JNZ:
                         if (jInst.getArg1() == ALL_HIGH) {
-                            inst = new TwoWordInstruction(OpCode.JONZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getWord1(), address, jInst.toString() + " CONV");
+                            inst = new TwoWordInstruction(OpCode.JONZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getW1(), address, jInst.toString() + " CONV");
                         } else {
                             inst = new OneWordInstruction(OpCode.JONZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, address, jInst.toString() + " CONV");
                         }
                         break;
                     case JLZ:
                         if (jInst.getArg1() == ALL_HIGH) {
-                            inst = new TwoWordInstruction(OpCode.JOLZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getWord1(), address, jInst.toString() + " CONV");
+                            inst = new TwoWordInstruction(OpCode.JOLZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getW1(), address, jInst.toString() + " CONV");
                         } else {
                             inst = new OneWordInstruction(OpCode.JOLZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, address, jInst.toString() + " CONV");
                         }
                         break;
                     case JSZ:
                         if (jInst.getArg1() == ALL_HIGH) {
-                            inst = new TwoWordInstruction(OpCode.JOSZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getWord1(), address, jInst.toString() + " CONV");
+                            inst = new TwoWordInstruction(OpCode.JOSZ, jInst.getArg1(), ALL_HIGH, ALL_HIGH, jInst.getW1(), address, jInst.toString() + " CONV");
                         } else {
                             inst = new OneWordInstruction(OpCode.JOSZ, jInst.getArg1(), ALL_HIGH, ALL_LOW, address, jInst.toString() + " CONV");
                         }
@@ -181,7 +181,7 @@ public class Assembler {
                         throw new RuntimeException();
                 }
             }
-            Word32[] iWords = inst.getWords();
+            Word32[] iWords = inst.toWords();
             System.out.println(String.format("%20s  :  %-30s", inst.toString(), Word32.arrayToString(iWords)));
             Collections.addAll(words, iWords);
         }
