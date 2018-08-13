@@ -8,3 +8,6 @@ fun bitsFromFloat(input: Float) = java.lang.Float.floatToIntBits(input)
 fun bytesFromInt(value: Int): ByteArray {
     return byteArrayOf((value shr 24).toByte(), (value shr 16).toByte(), (value shr 8).toByte(), value.toByte())
 }
+
+val ALL_LOW = 0x00.toByte()
+val ALL_HIGH = 0xFF.toByte()

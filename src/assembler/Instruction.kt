@@ -1,6 +1,6 @@
 package assembler
 
-import common.Constants.ALL_HIGH
+import common.ALL_HIGH
 import common.OpCode
 import common.Word32
 
