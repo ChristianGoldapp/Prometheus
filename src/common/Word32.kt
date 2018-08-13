@@ -98,10 +98,10 @@ class Word32(rawValue: Int) {
         fun arrayToString(words: Array<Word32>, row: Int): String {
             val sb: StringBuilder = StringBuilder()
 
-            words.toList().chunked(row).forEach({ x ->
+            words.toList().chunked(row).forEach { x ->
                 x.forEach { x -> sb.append(" ").append(x.hexString()) }
                 sb.append("\n")
-            })
+            }
             return sb.toString()
         }
 
