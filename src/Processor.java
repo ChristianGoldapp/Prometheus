@@ -165,49 +165,49 @@ public class Processor implements Constants {
                 registers[args[2]] = vals[0].xor(vals[1]);
                 break;
             case JAIZ:
-                if (vals[0].value() == 0) {
+                if (vals[0].getValue() == 0) {
                     nEP = vals[1].intValue();
                 }
                 break;
             case JANZ:
-                if (vals[0].value() != 0) {
+                if (vals[0].getValue() != 0) {
                     nEP = vals[1].intValue();
                 }
                 break;
             case JALZ:
-                if (vals[0].value() > 0) {
+                if (vals[0].getValue() > 0) {
                     nEP = vals[1].intValue();
                 }
                 break;
             case JASZ:
-                if (vals[0].value() < 0) {
+                if (vals[0].getValue() < 0) {
                     nEP = vals[1].intValue();
                 }
                 break;
             case JOIZ:
-                if (vals[0].value() == 0) {
+                if (vals[0].getValue() == 0) {
                     nEP = executionPointer + vals[1].intValue();
                 }
                 break;
             case JONZ:
-                if (vals[0].value() != 0) {
+                if (vals[0].getValue() != 0) {
                     nEP = executionPointer + vals[1].intValue();
                 }
                 break;
             case JOLZ:
-                if (vals[0].value() > 0) {
+                if (vals[0].getValue() > 0) {
                     nEP = executionPointer + vals[1].intValue();
                 }
                 break;
             case JOSZ:
-                if (vals[0].value() < 0) {
+                if (vals[0].getValue() < 0) {
                     nEP = executionPointer + vals[1].intValue();
                 }
                 break;
             case SYSCALL:
                 break;
             case JAEQ:
-                if (vals[0].value() == vals[1].value()) {
+                if (vals[0].getValue() == vals[1].getValue()) {
                     nEP = vals[2].intValue();
                 }
                 break;
