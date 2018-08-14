@@ -79,31 +79,26 @@ class Word32(rawValue: Int) {
         fun wordsToBytes(words: Array<Word32>) = words.map { x -> x.bytes().toList() }
 
         @JvmStatic
-        fun valueOf(s: String): Word32 =
-                if (s.startsWith("0x")) Word32(Integer.parseUnsignedInt(s.substring(2), 16))
-                else Word32(Integer.valueOf(s))
+        fun valueOf(s: String): Word32? {
+            val trimmed: String = if (s.startsWith("0x")) s.substring(2) else s
+            return trimmed.toLongOrNull(16)?.toInt()?.let { Word32(it) }
+        }
 
 
         @JvmStatic
         fun fromFloat(f: Float) = Word32(bitsFromFloat(f))
 
         @JvmStatic
-        fun arrayToString(words: Array<Word32>): String {
-            val sb: StringBuilder = StringBuilder()
-            words.forEach { x -> sb.append(" ").append(x.hexString()) }
-            return sb.toString()
-        }
+        fun arrayToString(words: Iterable<Word32>): String = words.map { it.hexString() }.joinToString(" ", prefix = " ")
 
         @JvmStatic
-        fun arrayToString(words: Array<Word32>, row: Int): String {
-            val sb: StringBuilder = StringBuilder()
+        fun arrayToString(words: Array<Word32>): String = arrayToString(words.asIterable())
 
-            words.toList().chunked(row).forEach { x ->
-                x.forEach { x -> sb.append(" ").append(x.hexString()) }
-                sb.append("\n")
-            }
-            return sb.toString()
-        }
+        @JvmStatic
+        fun arrayToString(words: Iterable<Word32>, row: Int): String = words.toList().chunked(row).map { arrayToString(it) }.joinToString(separator = System.lineSeparator())
+
+        @JvmStatic
+        fun arrayToString(words: Array<Word32>, row: Int): String = arrayToString(words.asIterable(), row)
 
         @JvmStatic
         val ONES = Word32(0.inv())
