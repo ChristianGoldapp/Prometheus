@@ -1,5 +1,7 @@
 package assembler
 
+import common.ALL_HIGH
+import common.ALL_LOW
 import common.OpCode
 import common.Word32
 
@@ -12,9 +14,6 @@ import kotlin.collections.ArrayList
  * @version 1.0
  */
 object Assembler {
-
-    private val ALL_LOW: Byte = 0
-    private val ALL_HIGH: Byte = -1
 
     @Throws(AssemblyException::class)
     fun parse(lines: Array<String>): List<Instruction> {
@@ -63,9 +62,9 @@ object Assembler {
                 }
             } else if (op.isLiteral) {
                 when (op) {
-                    OpCode.PUT -> instructions.add(OneWordInstruction(OpCode.MOV, ALL_HIGH, parseArgument(tokens[1]), ALL_LOW, Word32.valueOf(tokens[0]), line))
+                    OpCode.PUT -> instructions.add(OneWordInstruction(OpCode.MOV, ALL_HIGH, parseArgument(tokens[1]), ALL_LOW, Word32.valueOf(tokens[0])!!, line))
                     OpCode.F_PUT -> instructions.add(OneWordInstruction(OpCode.MOV, ALL_HIGH, parseArgument(tokens[1]), ALL_LOW, Word32.fromFloat(java.lang.Float.valueOf(tokens[0])), line))
-                    OpCode.U_PUT -> instructions.add(OneWordInstruction(OpCode.MOV, ALL_HIGH, parseArgument(tokens[1]), ALL_LOW, Word32.valueOf(tokens[0]), line))
+                    OpCode.U_PUT -> instructions.add(OneWordInstruction(OpCode.MOV, ALL_HIGH, parseArgument(tokens[1]), ALL_LOW, Word32.valueOf(tokens[0])!!, line))
                 }
             } else {
                 var arg1 = ALL_LOW
@@ -142,32 +141,31 @@ object Assembler {
             val op = inst.opCode
             //We swap out every Jump instruction with the equivalent Jump to offset.
             if (inst is JumpInstruction) {
-                val jInst = inst
-                val jumpToLine = pointers[jInst.jumpto]
+                val jumpToLine = pointers[inst.jumpto]
                 val currentLine = pointers[i]
                 val offset = jumpToLine - currentLine
                 val address = Word32(offset)
                 when (op) {
-                    OpCode.JMP -> inst = OneWordInstruction(OpCode.JOF, ALL_HIGH, ALL_LOW, ALL_LOW, address, jInst.toString() + " CONV")
-                    OpCode.JIZ -> if (jInst.arg1 == ALL_HIGH) {
-                        inst = TwoWordInstruction(OpCode.JOIZ, jInst.arg1, ALL_HIGH, ALL_HIGH, jInst.w1, address, jInst.toString() + " CONV")
+                    OpCode.JMP -> inst = OneWordInstruction(OpCode.JOF, ALL_HIGH, ALL_LOW, ALL_LOW, address, inst.toString() + " CONV")
+                    OpCode.JIZ -> if (inst.arg1 == ALL_HIGH) {
+                        inst = TwoWordInstruction(OpCode.JOIZ, inst.arg1, ALL_HIGH, ALL_HIGH, inst.w1, address, inst.toString() + " CONV")
                     } else {
-                        inst = OneWordInstruction(OpCode.JOIZ, jInst.arg1, ALL_HIGH, ALL_LOW, address, jInst.toString() + " CONV")
+                        inst = OneWordInstruction(OpCode.JOIZ, inst.arg1, ALL_HIGH, ALL_LOW, address, inst.toString() + " CONV")
                     }
-                    OpCode.JNZ -> if (jInst.arg1 == ALL_HIGH) {
-                        inst = TwoWordInstruction(OpCode.JONZ, jInst.arg1, ALL_HIGH, ALL_HIGH, jInst.w1, address, jInst.toString() + " CONV")
+                    OpCode.JNZ -> if (inst.arg1 == ALL_HIGH) {
+                        inst = TwoWordInstruction(OpCode.JONZ, inst.arg1, ALL_HIGH, ALL_HIGH, inst.w1, address, inst.toString() + " CONV")
                     } else {
-                        inst = OneWordInstruction(OpCode.JONZ, jInst.arg1, ALL_HIGH, ALL_LOW, address, jInst.toString() + " CONV")
+                        inst = OneWordInstruction(OpCode.JONZ, inst.arg1, ALL_HIGH, ALL_LOW, address, inst.toString() + " CONV")
                     }
-                    OpCode.JLZ -> if (jInst.arg1 == ALL_HIGH) {
-                        inst = TwoWordInstruction(OpCode.JOLZ, jInst.arg1, ALL_HIGH, ALL_HIGH, jInst.w1, address, jInst.toString() + " CONV")
+                    OpCode.JLZ -> if (inst.arg1 == ALL_HIGH) {
+                        inst = TwoWordInstruction(OpCode.JOLZ, inst.arg1, ALL_HIGH, ALL_HIGH, inst.w1, address, inst.toString() + " CONV")
                     } else {
-                        inst = OneWordInstruction(OpCode.JOLZ, jInst.arg1, ALL_HIGH, ALL_LOW, address, jInst.toString() + " CONV")
+                        inst = OneWordInstruction(OpCode.JOLZ, inst.arg1, ALL_HIGH, ALL_LOW, address, inst.toString() + " CONV")
                     }
-                    OpCode.JSZ -> if (jInst.arg1 == ALL_HIGH) {
-                        inst = TwoWordInstruction(OpCode.JOSZ, jInst.arg1, ALL_HIGH, ALL_HIGH, jInst.w1, address, jInst.toString() + " CONV")
+                    OpCode.JSZ -> if (inst.arg1 == ALL_HIGH) {
+                        inst = TwoWordInstruction(OpCode.JOSZ, inst.arg1, ALL_HIGH, ALL_HIGH, inst.w1, address, inst.toString() + " CONV")
                     } else {
-                        inst = OneWordInstruction(OpCode.JOSZ, jInst.arg1, ALL_HIGH, ALL_LOW, address, jInst.toString() + " CONV")
+                        inst = OneWordInstruction(OpCode.JOSZ, inst.arg1, ALL_HIGH, ALL_LOW, address, inst.toString() + " CONV")
                     }
                     else -> throw RuntimeException()
                 }
@@ -180,24 +178,16 @@ object Assembler {
     }
 
     private fun parseArgument(s: String): Byte {
-        var s = s
-        s = s.trim { it <= ' ' }
-        val b: Byte
-        if (s.startsWith("R")) {
-            b = java.lang.Byte.valueOf(s.substring(1))!!
+        val trimmed = s.trim { it <= ' ' }
+        return if (trimmed.startsWith("R")) {
+            s.substring(1).toByte()
         } else {
-            b = ALL_HIGH
+            ALL_HIGH
         }
-        return b
     }
 
     private fun parseWord(s: String): Word32 {
-        try {
-            return Word32.valueOf(s)
-        } catch (e: Exception) {
-            return Word32.ZEROES
-        }
-
+        return Word32.valueOf(s) ?: Word32.ZEROES
     }
 
 }

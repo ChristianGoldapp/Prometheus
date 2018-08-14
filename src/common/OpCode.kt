@@ -1,12 +1,10 @@
 package common
 
-import java.util.*
-
 /**
  * @author Chris Gold
  * @version 1.0
  */
-enum class OpCode private constructor(i: Int) {
+enum class OpCode(i: Int) {
     //Value-Register
     MOV(0x10),
     LOAD(0x12), SAVE(0x13), NOT(0x50), LSHIFT(0x5E), RSHIFT(0x5F), FTOI(0x60), ITOF(0x61), UTOI(0x62), ITOU(0x63),
@@ -52,25 +50,11 @@ enum class OpCode private constructor(i: Int) {
 
     companion object {
 
-        internal var jumps = Arrays.asList(JMP, JIZ, JNZ, JLZ, JSZ)
-        internal var literals = Arrays.asList(PUT, F_PUT, U_PUT)
+        internal var jumps = arrayOf(JMP, JIZ, JNZ, JLZ, JSZ)
+        internal var literals = arrayOf(PUT, F_PUT, U_PUT)
 
-        operator fun get(s: String): OpCode? {
-            for (opCode in OpCode.values()) {
-                if (opCode.toString().equals(s, ignoreCase = true)) {
-                    return opCode
-                }
-            }
-            return null
-        }
+        operator fun get(s: String): OpCode? = OpCode.values().firstOrNull { it.toString().equals(s, ignoreCase = true) }
 
-        operator fun get(c: Byte): OpCode? {
-            for (opCode in OpCode.values()) {
-                if (opCode.code == c) {
-                    return opCode
-                }
-            }
-            return null
-        }
+        operator fun get(c: Byte): OpCode? = OpCode.values().firstOrNull { it.code == c }
     }
 }
