@@ -30,13 +30,9 @@ class Processor @JvmOverloads constructor(memSize: Int = DEFAULT_MEMSIZE, regSiz
         val firstWord = memory[executionPointer]
         val firstWordBytes = firstWord.bytes()
         val op = OpCode[firstWordBytes[0]]
-        if (op === OpCode.HALT) {
-            return -1
-        }
         val argWords = ArrayList<Word32>(3)
         var argCount = 0
-        val args = ByteArray(3)
-        System.arraycopy(firstWordBytes, 1, args, 0, firstWordBytes.size - 1)
+        val args = firstWordBytes.copyOfRange(1, 4)
         for (arg in args) {
             if (arg == ALL_HIGH) {
                 argWords.add(memory[executionPointer + argWords.size + 1])
@@ -45,13 +41,8 @@ class Processor @JvmOverloads constructor(memSize: Int = DEFAULT_MEMSIZE, regSiz
         }
         val vals = Array(3, { Word32.ONES })
         for (i in args.indices) {
-            val arg = args[i]
-            if (arg == ALL_HIGH) {
-                vals[i] = argWords[0]
-                argWords.removeAt(0)
-            } else {
-                vals[i] = registers[args[i]]
-            }
+            vals[i] = if (ALL_HIGH == args[i]) argWords.removeAt(0)
+            else registers[args[i]]
         }
         var nEP = executionPointer + 1 + argCount
         when (op) {
