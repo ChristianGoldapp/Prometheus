@@ -1,5 +1,7 @@
 package common
 
+import java.nio.ByteBuffer
+
 class Word32(rawValue: Int) {
 
     val value = rawValue
@@ -28,9 +30,9 @@ class Word32(rawValue: Int) {
 
     fun fdiv(that: Word32): Word32 = fop(that, { a, b -> a / b })
 
-    fun fop(that: Word32, op: FloatBinOp): Word32 = Word32(bitsFromFloat(op(this.floatValue(), that.floatValue())))
+    fun fop(that: Word32, op: FloatBinOp): Word32 = Word32((op(this.floatValue(), that.floatValue())).toRawBits())
 
-    fun floatValue() = floatFromBits(value)
+    fun floatValue() = value.floatFromBits()
 
     fun and(that: Word32): Word32 = Word32(this.value and that.value)
 
@@ -46,23 +48,23 @@ class Word32(rawValue: Int) {
 
     fun ftoi(): Word32 = Word32(this.floatValue().toInt())
 
-    fun itof(): Word32 = Word32(bitsFromFloat(floatValue()))
+    fun itof(): Word32 = Word32(floatValue().toRawBits())
 
     fun itou(): Word32 = Word32(Math.abs(value))
 
     fun utoi(): Word32 = Word32(if (value < 0) value + Int.MAX_VALUE else value)
 
-    fun bytes(): ByteArray = bytesFromInt(value)
+    fun bytes(): ByteArray = value.bytes()
 
-    override fun toString() = "%s (%d)".format(hex(value), intValue())
+    override fun toString() = "%s (%d)".format(value.hex(), intValue())
 
     fun intValue() = value
 
-    fun lineReport() = "%s %10d %20f %11d %s".format(hex(value), intValue(), floatValue(), uintValue(), String.format("%32s", Integer.toUnsignedString(value, 2)).replace(" ", "0"))
+    fun lineReport() = "%s %10d %20f %11d %s".format(value.hex(), intValue(), floatValue(), uintValue(), String.format("%32s", Integer.toUnsignedString(value, 2)).replace(" ", "0"))
 
     fun uintValue() = Integer.toUnsignedLong(value)
 
-    fun hexString() = hex(value)
+    fun hexString() = value.hex()
 
     fun equals(that: Word32) = this.value == that.value
 
@@ -78,7 +80,9 @@ class Word32(rawValue: Int) {
             return trimmed.toLongOrNull(16)?.toInt()?.let { Word32(it) }
         }
 
-        fun fromFloat(f: Float) = Word32(bitsFromFloat(f))
+        fun fromFloat(f: Float) = Word32(f.toRawBits())
+
+        fun fromBytes(bytes: ByteArray) = Word32(ByteBuffer.wrap(bytes).getInt())
     }
 }
 

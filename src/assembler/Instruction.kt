@@ -7,7 +7,7 @@ import common.bytesToWords
 
 sealed class Instruction(val opCode: OpCode, val arg1: Byte, val arg2: Byte, val arg3: Byte, val lineform: String) {
     abstract fun toBytes(): ByteArray
-    fun toWords(): Array<Word32> = bytesToWords(toBytes())
+    fun toWords(): Array<Word32> = toBytes().bytesToWords()
     abstract val width: Int
     override fun toString() = lineform
 }
