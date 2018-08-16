@@ -1,7 +1,5 @@
 package common
 
-import java.nio.ByteBuffer
-
 class Word32(rawValue: Int) {
 
     val value = rawValue
@@ -70,41 +68,17 @@ class Word32(rawValue: Int) {
 
     companion object {
         @JvmStatic
-        fun bytesToWords(bytes: ByteArray) = bytes.toList().chunked(4).map { chunk -> fromBytes(chunk.toByteArray()) }.toTypedArray()
+        val ONES = Word32(0.inv())
 
         @JvmStatic
-        fun fromBytes(bytes: ByteArray) = Word32(ByteBuffer.wrap(bytes).getInt())
+        val ZEROES = Word32(0)
 
-        @JvmStatic
-        fun wordsToBytes(words: Array<Word32>) = words.map { x -> x.bytes().toList() }
-
-        @JvmStatic
         fun valueOf(s: String): Word32? {
             val trimmed: String = if (s.startsWith("0x")) s.substring(2) else s
             return trimmed.toLongOrNull(16)?.toInt()?.let { Word32(it) }
         }
 
-
-        @JvmStatic
         fun fromFloat(f: Float) = Word32(bitsFromFloat(f))
-
-        @JvmStatic
-        fun arrayToString(words: Iterable<Word32>): String = words.map { it.hexString() }.joinToString(" ", prefix = " ")
-
-        @JvmStatic
-        fun arrayToString(words: Array<Word32>): String = arrayToString(words.asIterable())
-
-        @JvmStatic
-        fun arrayToString(words: Iterable<Word32>, row: Int): String = words.toList().chunked(row).map { arrayToString(it) }.joinToString(separator = System.lineSeparator())
-
-        @JvmStatic
-        fun arrayToString(words: Array<Word32>, row: Int): String = arrayToString(words.asIterable(), row)
-
-        @JvmStatic
-        val ONES = Word32(0.inv())
-
-        @JvmStatic
-        val ZEROES = Word32(0)
     }
 }
 

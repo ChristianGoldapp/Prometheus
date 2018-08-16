@@ -1,5 +1,6 @@
 import assembler.Assembler
 import common.Word32
+import common.bytesToWords
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.file.Files
@@ -14,7 +15,7 @@ fun main(args: Array<String>) {
 
 private fun readWordsFromFile(f: File): Array<Word32> {
     val b = Files.readAllBytes(f.toPath())
-    return Word32.bytesToWords(b)
+    return bytesToWords(b)
 }
 
 private fun execute(f: File) {
