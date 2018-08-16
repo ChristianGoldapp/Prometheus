@@ -1,9 +1,6 @@
 package assembler
 
-import common.ALL_HIGH
-import common.ALL_LOW
-import common.OpCode
-import common.Word32
+import common.*
 
 import java.util.*
 import java.util.stream.Collectors
@@ -171,7 +168,7 @@ object Assembler {
                 }
             }
             val iWords = inst.toWords()
-            println(String.format("%20s  :  %-30s", inst.toString(), Word32.arrayToString(iWords)))
+            println(String.format("%20s  :  %-30s", inst.toString(), arrayToString(iWords)))
             Collections.addAll(words, *iWords)
         }
         return words.toTypedArray()

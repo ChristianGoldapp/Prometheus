@@ -3,10 +3,11 @@ package assembler
 import common.ALL_HIGH
 import common.OpCode
 import common.Word32
+import common.bytesToWords
 
 sealed class Instruction(val opCode: OpCode, val arg1: Byte, val arg2: Byte, val arg3: Byte, val lineform: String) {
     abstract fun toBytes(): ByteArray
-    fun toWords(): Array<Word32> = Word32.bytesToWords(toBytes())
+    fun toWords(): Array<Word32> = bytesToWords(toBytes())
     abstract val width: Int
     override fun toString() = lineform
 }

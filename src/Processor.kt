@@ -1,6 +1,4 @@
-import common.ALL_HIGH
-import common.OpCode
-import common.Word32
+import common.*
 
 import java.util.*
 
@@ -137,13 +135,8 @@ class Processor @JvmOverloads constructor(memSize: Int = DEFAULT_MEMSIZE, regSiz
             sb.append("\n")
         }
         sb.append("Memory:\n")
-        sb.append(Word32.arrayToString(memory, 16))
+        sb.append(arrayToString(memory, 16))
         return sb.toString()
-    }
-
-    companion object {
-        val DEFAULT_MEMSIZE = 2 shl 8
-        val DEFAULT_REGSIZE = 10
     }
 
 }
