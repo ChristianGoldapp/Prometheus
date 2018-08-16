@@ -10,18 +10,10 @@ import java.util.*
  */
 class Processor @JvmOverloads constructor(memSize: Int = DEFAULT_MEMSIZE, regSize: Int = DEFAULT_REGSIZE) {
     private val stdin = Scanner(System.`in`)
-    private val memory: Array<Word32>
-    private val registers: Array<Word32>
-    private val stack: Stack<Word32>
+    private val memory: Array<Word32> = Array(memSize, { Word32.ZEROES })
+    private val registers: Array<Word32> = Array(regSize, { Word32.ZEROES })
+    private val stack: Stack<Word32> = Stack()
     private var executionPointer: Int = 0
-
-    init {
-        this.executionPointer = 0
-        this.memory = Array(memSize, { Word32.ZEROES })
-        this.registers = Array(regSize, { Word32.ZEROES })
-        Arrays.fill(registers, Word32(0))
-        this.stack = Stack()
-    }
 
     fun setProgram(program: Array<Word32>) {
         Arrays.fill(memory, Word32(0))
