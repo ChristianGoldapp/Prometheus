@@ -1,17 +1,15 @@
 package common
 
-import java.nio.ByteBuffer
+fun Int.hex() = "0x%08X".format(this)
 
-fun hex(input: Int) = "0x%08X".format(Integer.valueOf(input))
+fun Int.hex(width: Int) = ("0x%0" + width + "X").format(this)
 
-fun hex(input: Int, width: Int) = ("0x%0" + width + "X").format(Integer.valueOf(input))
+fun Int.floatFromBits() = java.lang.Float.intBitsToFloat(this)
 
-fun floatFromBits(input: Int) = java.lang.Float.intBitsToFloat(input)
+fun Float.bits() = toRawBits()
 
-fun bitsFromFloat(input: Float) = java.lang.Float.floatToIntBits(input)
-
-fun bytesFromInt(value: Int): ByteArray {
-    return byteArrayOf((value shr 24).toByte(), (value shr 16).toByte(), (value shr 8).toByte(), value.toByte())
+fun Int.bytes(): ByteArray {
+    return byteArrayOf((this shr 24).toByte(), (this shr 16).toByte(), (this shr 8).toByte(), this.toByte())
 }
 
 val ALL_LOW = 0x00.toByte()
@@ -20,9 +18,7 @@ val ALL_HIGH = 0xFF.toByte()
 val DEFAULT_MEMSIZE = 2 shl 8
 val DEFAULT_REGSIZE = 10
 
-fun bytesToWords(bytes: ByteArray) = bytes.toList().chunked(4).map { chunk -> fromBytes(chunk.toByteArray()) }.toTypedArray()
-
-fun fromBytes(bytes: ByteArray) = Word32(ByteBuffer.wrap(bytes).getInt())
+fun ByteArray.bytesToWords() = toList().chunked(4).map { chunk -> Word32.fromBytes(chunk.toByteArray()) }.toTypedArray()
 
 fun wordsToBytes(words: Array<Word32>) = words.map { x -> x.bytes().toList() }
 

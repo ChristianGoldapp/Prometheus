@@ -6,7 +6,7 @@ import java.util.*
  * @author Chris Gold
  * @version 1.0
  */
-class Processor @JvmOverloads constructor(memSize: Int = DEFAULT_MEMSIZE, regSize: Int = DEFAULT_REGSIZE) {
+class Processor(memSize: Int = DEFAULT_MEMSIZE, regSize: Int = DEFAULT_REGSIZE) {
     private val stdin = Scanner(System.`in`)
     private val memory: Array<Word32> = Array(memSize, { Word32.ZEROES })
     private val registers: Array<Word32> = Array(regSize, { Word32.ZEROES })

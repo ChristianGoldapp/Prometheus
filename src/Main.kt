@@ -15,7 +15,7 @@ fun main(args: Array<String>) {
 
 private fun readWordsFromFile(f: File): Array<Word32> {
     val b = Files.readAllBytes(f.toPath())
-    return bytesToWords(b)
+    return b.bytesToWords()
 }
 
 private fun execute(f: File) {
