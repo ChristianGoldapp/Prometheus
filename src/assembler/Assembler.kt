@@ -1,9 +1,7 @@
 package assembler
 
 import common.*
-
 import java.util.*
-import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
 /**
@@ -13,11 +11,8 @@ import kotlin.collections.ArrayList
 object Assembler {
 
     @Throws(AssemblyException::class)
-    fun parse(lines: Array<String>): List<Instruction> {
-        var lines = lines
-        //Split into lines, discard comments
-        val lList = Arrays.stream(lines).filter { x -> !x.startsWith("//") && !x.startsWith("#") }.collect(Collectors.toList())
-        lines = lList.toTypedArray()
+    fun parse(inputLines: Array<String>): List<Instruction> {
+        val lines = inputLines.filter { x -> !x.startsWith("//") && !x.startsWith("#") }
         //Read in labels
         //Map from label to line number
         val labels = HashMap<String, Int>()
