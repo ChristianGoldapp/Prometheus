@@ -4,7 +4,7 @@
 
 I was playing the video game [TIS-100](http://www.zachtronics.com/tis-100/) by Zachtronics, when I realised how fun playing with such a programming language was; safeguarded from all the intricacies of "real" ASM like, say, x86. Unfortunately (for me at least), the programming language used in TIS-100 is extremely limited, and based on multiple coprocessors. I set to designing a more capable language, and that is what I did.
 
-Prometheus is an assembly language that is assembles and interpreted by Java. It's purely for entertainment (and maybe educational) purposes. It is based on opcodes that are executed one after another by the processor.
+Prometheus is an ISA with its assembly language that is assembled and interpreted by Java. It's purely for entertainment (and maybe educational) purposes. It is based on opcodes that are executed sequentially, one after another, by the processor.
 
 ## 2. Execution Enviroment ##
 
